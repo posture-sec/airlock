@@ -50,7 +50,7 @@ Say this plainly rather than letting a reviewer find it.
 | Five of the seven fail closed under Airlock today, measured | Now six. Cases 1 to 5 were measured on the `cfg-*` and `wasm-*` rules, and case 7 (a decode-and-eval payload under `vendor/`) was measured on 2026-10-30 against `python -m airlock scan --mode full` in a scratch repository: `1 HIGH · exit 1` from `pat-decode-eval`, which task 3.6's text-side slice added. Only case 6, a `.cargo/config.toml` shell `runner`, stays invisible until `cargo_vectors` (6.4). No bypass harness locks these in yet; that is task 3.9, issue 14 |
 | A repository can install it as a GitHub Action | Not built. `action.yml` is task 4.1, issue 15 |
 | It detects Stellar-specific compromise (Soroban size limits, SEP metadata, secret seeds) | Not built. D-06 is owner-approved KEEP as of 2026-10-28 UTC for offline checksum-valid plaintext tracked-file seeds; implementation remains 6.2/6.3. This does not add size-limit or SEP-metadata checks. |
-| There is a release to pin | No tag, no release, no attestation. Phase 5 |
+| There is a release to pin | `v0.0.1` exists as a pre-release since 2026-11-02, described in its own notes as not a version to depend on. No signed artifact and no attestation, which are task 5.3, and `v0.1.0` is Phase 5 |
 | Someone outside this repository uses it | No adoption evidence at all |
 
 The last row is the weakest part of this application and the reason task 8.4 lists adoption evidence

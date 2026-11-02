@@ -1,8 +1,33 @@
 # Wave readiness: repository settings
 
-Everything in this file is a setting on `posture-sec/airlock`, not a code change. None of it has been
-applied. Each command is written so the owner can run it, or approve an agent running it, one
-section at a time.
+Everything in this file is a setting on `posture-sec/airlock`, not a code change. Sections 2, 3, 4 and
+5 were applied on 2026-11-02 as part of the move (task 1.15) and read back; the Drips application in
+section 1 step 4 and the issue publication in step 5 are not applied, in that file's own order. Each
+command is written so the owner can run it, or approve an agent running it, one section at a time.
+
+| Applied 2026-11-02 | Result read back |
+|---|---|
+| Topics | the twelve listed, set as a full replacement |
+| Labels | `Stellar Wave`, three `complexity: *`, seven `area: *`, `type: test`, `blocked`, plus the stock set: 23 in total |
+| Ruleset | `protect main`, id 26360459, enforcement active, requiring the `checks` and `roadmap` contexts from integration 15368, strict, merge and squash allowed |
+| Pages | `build_type: workflow`; run 3 of `pages.yml` deployed `main`, and `https://posture-sec.github.io/airlock/` answers 200 with the new URLs on every page and in `sitemap.xml` (run 1 failed, before Pages was enabled) |
+| Release | `v0.0.1` as a pre-release on `main`, with notes that name the unbuilt Action, Stellar detectors and SARIF |
+
+Two readings that the plan did not predict:
+
+- **On the free plan, a private repository can have neither a ruleset nor Pages.** `POST /repos/.../rulesets`
+  answers 403, "Upgrade to GitHub Pro or make this repository public to enable this feature", and
+  `POST /repos/.../pages` answers 422, "Your current plan does not support GitHub Pages for this
+  repository". Both succeeded the moment the repository was public. This is the live half of the answer
+  task 0.16 asks for, and it means the controls have to be applied last rather than first.
+- **The ruleset key in section 4 is spelled wrong and its approver count does not work here.** The
+  `pull_request` rule takes `required_approving_review_count`, not `required_approver_count`, and a
+  count of 1 on a one-maintainer repository blocks every pull request, because GitHub does not let an
+  author approve their own. The applied ruleset therefore sets it to 0 and turns
+  `require_code_owner_review` off, the same shape `posture-sec/guage` runs, and keeps thread
+  resolution, strict status checks and the four ref rules. `guage` records the same acceptance under
+  its D-14. The required checks are the real enforcement here, and pull request #1 of this repository
+  is the run that shows the `checks` and `roadmap` contexts arriving.
 
 Verified against the live repository on 2026-10-28 with read-only calls. That reading was taken at
 `airlock-sec/airlock`, the repository before the 2026-11-02 move (task 1.15), so it describes the

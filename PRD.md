@@ -272,7 +272,7 @@ No calendar dates are promised. Phases, tasks and exit criteria live in `ROADMAP
 | Consumers auto-merge bot bumps of the pinned Action SHA | Medium | Document manual review of SHA bumps; releases are attested |
 | SEP-58 and `--verifiable` change under us | Medium | No SEP-58 dependency in P0 or P1 |
 | Docs inconsistencies (contract size limit, build target, SDK versions) | Certain | Never hardcode limits, targets or versions; read from policy |
-| Name collision: other security products and libraries use the word "airlock" [Unverified] | Medium | Task 0.15 before the first release; the `airlock-sec` namespace and the Stellar-specific description reduce confusion |
+| Name collision: other security products and libraries use the word "airlock" [Unverified] | Medium | Task 0.15 before the first release; the `posture-sec` namespace and the Stellar-specific description reduce confusion |
 | The `posture-sec` org plan may lack some ruleset or org-level required-workflow features [Unverified] | Low | Task 0.16; fall back to repository rulesets and a required status check; strengthens the case for decision D-04 if gaps remain |
 
 ## 11. Open questions
@@ -283,7 +283,7 @@ No calendar dates are promised. Phases, tasks and exit criteria live in `ROADMAP
 4. Resolved 2026-10-28 UTC (task 0.7, D-06): **KEEP**, approved by the owner. At the pinned revisions cited in `ARCHITECTURE.md` 9.4, Gitleaks has 222 rules and no dedicated Stellar/StrKey checksum detector; `generic-api-key` may incidentally match via keyword/assignment context and entropy >= 3.5. TruffleHog has no dedicated Stellar detector; `privatekey` handles PEM blocks and the generic detector registration is commented out. This is source inspection, not executed-tool coverage. Retain the offline checksum-valid plaintext tracked-file detector, not a general secret scanner; implementation stays in 6.2 and 6.3.
 5. Where does stellar-cli store identities, and is there a keychain option? (not needed until a detector depends on it)
 6. SEP-58 final status and metadata key names. (task 0.11)
-7. Can a required status check be pinned to a trusted source, and which ruleset, required-check and required-workflow features does the `airlock-sec` org plan provide? (tasks 0.13, 0.16) [Unverified: recalled from GitHub features, not checked]
+7. Can a required status check be pinned to a trusted source, and which ruleset, required-check and required-workflow features does the `posture-sec` org plan provide? (tasks 0.13, 0.16) [Unverified: recalled from GitHub features, not checked]
 8. Should watch mode be built? (D-04)
 9. Does the name "Airlock" collide with an existing security product, PyPI package or trademark? (task 0.15)
 
