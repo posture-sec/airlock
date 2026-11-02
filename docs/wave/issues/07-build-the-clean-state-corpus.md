@@ -5,7 +5,7 @@ labels: Stellar Wave, complexity: medium, area: tests, enhancement
 roadmap: 0.10
 ---
 
-> **Repo context.** `airlock` is a Python 3.11 standard-library-only scanner: `src/airlock/` holds the pipeline (collector, then rules and detectors, then fingerprints and suppressions, then reporters) behind one CLI, and the rules themselves are data in `rules/builtin/*.toml`. The repository being scanned is untrusted input, so the hard rules in [`AGENTS.md`](https://github.com/airlock-sec/airlock/blob/main/AGENTS.md) section 4 are security properties rather than style. [`ROADMAP.md`](https://github.com/airlock-sec/airlock/blob/main/ROADMAP.md) is the source of truth for what is built and what is only a docstring.
+> **Repo context.** `airlock` is a Python 3.11 standard-library-only scanner: `src/airlock/` holds the pipeline (collector, then rules and detectors, then fingerprints and suppressions, then reporters) behind one CLI, and the rules themselves are data in `rules/builtin/*.toml`. The repository being scanned is untrusted input, so the hard rules in [`AGENTS.md`](https://github.com/posture-sec/airlock/blob/main/AGENTS.md) section 4 are security properties rather than style. [`ROADMAP.md`](https://github.com/posture-sec/airlock/blob/main/ROADMAP.md) is the source of truth for what is built and what is only a docstring.
 
 > 🟢 **Unblocked.** It depends on nothing: the six repositories it snapshots are public, and the scanner that will read the snapshot is on `main`. Three open tasks name it as their dependency, so this is the queue's bottleneck.
 
@@ -22,7 +22,7 @@ Three rows are waiting on the same snapshot: 3.3 (threshold tuning), 3.8 (the pa
 proves the ported rules lose no findings against `malware_scan.py`), and 4.6 (the corpus gate in CI,
 gate G4). `ROADMAP.md` section 4 names it as one of the two tasks that unblock the most.
 
-[`tests/corpus/`](https://github.com/airlock-sec/airlock/blob/main/tests/corpus) exists as a
+[`tests/corpus/`](https://github.com/posture-sec/airlock/blob/main/tests/corpus) exists as a
 directory with a `.gitkeep` in it and nothing else.
 
 There is a hard part, and it is the reason this issue is Medium rather than a fetch script. The
@@ -76,12 +76,12 @@ not a mirror.
 
 ## Tech stack
 
-- Runtime: Python 3.11, standard library only. [`AGENTS.md`](https://github.com/airlock-sec/airlock/blob/main/AGENTS.md) section 4 forbids adding a runtime dependency, and a scan never touches the network, so a helper library is not an option here.
-- Directory: [`tests/corpus`](https://github.com/airlock-sec/airlock/blob/main/tests/corpus), which holds a `.gitkeep` today. Baselines go under [`tests/golden`](https://github.com/airlock-sec/airlock/blob/main/tests/golden) if the issue's chosen design needs them.
-- The collision to plan around: [`.github/workflows/ci.yml`](https://github.com/airlock-sec/airlock/blob/main/.github/workflows/ci.yml) runs `airlock scan --mode full .` over the whole tree, so a real-world snapshot is scanned by the build that is supposed to stay green.
-- Allowed resolutions are a separate corpus job with its own baseline, or owner-issued suppressions in [`airlock.toml`](https://github.com/airlock-sec/airlock/blob/main/airlock.toml). A skip, a `.gitignore` entry or a default directory exclusion is not a resolution; those are the bypasses this project exists to close.
+- Runtime: Python 3.11, standard library only. [`AGENTS.md`](https://github.com/posture-sec/airlock/blob/main/AGENTS.md) section 4 forbids adding a runtime dependency, and a scan never touches the network, so a helper library is not an option here.
+- Directory: [`tests/corpus`](https://github.com/posture-sec/airlock/blob/main/tests/corpus), which holds a `.gitkeep` today. Baselines go under [`tests/golden`](https://github.com/posture-sec/airlock/blob/main/tests/golden) if the issue's chosen design needs them.
+- The collision to plan around: [`.github/workflows/ci.yml`](https://github.com/posture-sec/airlock/blob/main/.github/workflows/ci.yml) runs `airlock scan --mode full .` over the whole tree, so a real-world snapshot is scanned by the build that is supposed to stay green.
+- Allowed resolutions are a separate corpus job with its own baseline, or owner-issued suppressions in [`airlock.toml`](https://github.com/posture-sec/airlock/blob/main/airlock.toml). A skip, a `.gitignore` entry or a default directory exclusion is not a resolution; those are the bypasses this project exists to close.
 - No secrets and no live-looking payload in the corpus. Copy tooling configs, Cargo manifests and Wasm fixtures, and say which commit each came from.
 
 ### **Contact & Support**
-- [`SUPPORT.md`](https://github.com/airlock-sec/airlock/blob/main/SUPPORT.md) — where to ask, the commands CI runs, and the rules that most often get a pull request rejected
-- [`SECURITY.md`](https://github.com/airlock-sec/airlock/blob/main/SECURITY.md) — private disclosure only; never open an issue about a bypass
+- [`SUPPORT.md`](https://github.com/posture-sec/airlock/blob/main/SUPPORT.md) — where to ask, the commands CI runs, and the rules that most often get a pull request rejected
+- [`SECURITY.md`](https://github.com/posture-sec/airlock/blob/main/SECURITY.md) — private disclosure only; never open an issue about a bypass

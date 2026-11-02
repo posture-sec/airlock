@@ -9,7 +9,7 @@ description = "Scan Stellar and Soroban repositories for supply-chain compromise
 readme = "README.md"
 requires-python = ">=3.11"
 license = "Apache-2.0"
-authors = [{ name = "airlock-sec" }]
+authors = [{ name = "posture-sec" }]
 keywords = ["security", "supply-chain", "stellar", "soroban", "scanner"]
 classifiers = [
   "Development Status :: 3 - Alpha",
@@ -22,7 +22,7 @@ classifiers = [
 airlock = "airlock.cli:main"
 
 [project.urls]
-Repository = "https://github.com/airlock-sec/airlock"
+Repository = "https://github.com/posture-sec/airlock"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/airlock"]

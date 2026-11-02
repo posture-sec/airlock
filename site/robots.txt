@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://airlock-sec.github.io/airlock/sitemap.xml
+Sitemap: https://posture-sec.github.io/airlock/sitemap.xml

@@ -6,7 +6,7 @@
 | Date | 2026-10-27 |
 | Owner | Ademola |
 | Name | Airlock |
-| Repository | https://github.com/airlock-sec/airlock (public, Apache-2.0, default branch `main`) |
+| Repository | https://github.com/posture-sec/airlock (public, Apache-2.0, default branch `main`) |
 | Companion docs | `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md`, `ROADMAP.md`, `project_structure.md`, `AGENTS.md`, `CLAUDE.md` |
 
 Conventions: **[Verified]** means checked against a source during research. **[Unverified]** means believed but not checked, or untested. Every Unverified item is listed again in section 12 so none of them silently becomes a requirement.
@@ -273,11 +273,11 @@ No calendar dates are promised. Phases, tasks and exit criteria live in `ROADMAP
 | SEP-58 and `--verifiable` change under us | Medium | No SEP-58 dependency in P0 or P1 |
 | Docs inconsistencies (contract size limit, build target, SDK versions) | Certain | Never hardcode limits, targets or versions; read from policy |
 | Name collision: other security products and libraries use the word "airlock" [Unverified] | Medium | Task 0.15 before the first release; the `airlock-sec` namespace and the Stellar-specific description reduce confusion |
-| The `airlock-sec` org plan may lack some ruleset or org-level required-workflow features [Unverified] | Low | Task 0.16; fall back to repository rulesets and a required status check; strengthens the case for decision D-04 if gaps remain |
+| The `posture-sec` org plan may lack some ruleset or org-level required-workflow features [Unverified] | Low | Task 0.16; fall back to repository rulesets and a required status check; strengthens the case for decision D-04 if gaps remain |
 
 ## 11. Open questions
 
-1. Resolved 2026-10-27: name Airlock, repository `airlock-sec/airlock` (decisions D-01, D-03). Because it sits outside the Tollcraft repositories, it likely needs its own Drips Wave application if you want Wave coverage. [Unverified]
+1. Resolved 2026-10-27: name Airlock, repository `posture-sec/airlock` (decisions D-01, D-03). Because it sits outside the Tollcraft repositories, it likely needs its own Drips Wave application if you want Wave coverage. [Unverified]
 2. Resolved 2026-10-27: Apache-2.0 (the `LICENSE` file already in the repository; decision D-02). The Tollcraft and Accensa repos mix MIT and Apache-2.0, so dogfooding crosses licenses, which is fine for scanning.
 3. Resolved 2026-10-27 (task 0.4): all seven bypasses are real. Each case was run as a commit in a scratch repository against the real script and every one exits 0, which passes the job; `scripts/bypass_probe.py` reproduces it and Appendix B records what each case produced.
 4. Resolved 2026-10-28 UTC (task 0.7, D-06): **KEEP**, approved by the owner. At the pinned revisions cited in `ARCHITECTURE.md` 9.4, Gitleaks has 222 rules and no dedicated Stellar/StrKey checksum detector; `generic-api-key` may incidentally match via keyword/assignment context and entropy >= 3.5. TruffleHog has no dedicated Stellar detector; `privatekey` handles PEM blocks and the generic detector registration is commented out. This is source inspection, not executed-tool coverage. Retain the offline checksum-valid plaintext tracked-file detector, not a general secret scanner; implementation stays in 6.2 and 6.3.

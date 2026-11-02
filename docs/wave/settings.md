@@ -1,10 +1,12 @@
 # Wave readiness: repository settings
 
-Everything in this file is a setting on `airlock-sec/airlock`, not a code change. None of it has been
+Everything in this file is a setting on `posture-sec/airlock`, not a code change. None of it has been
 applied. Each command is written so the owner can run it, or approve an agent running it, one
 section at a time.
 
-Verified against the live repository on 2026-10-28 with read-only calls:
+Verified against the live repository on 2026-10-28 with read-only calls. That reading was taken at
+`airlock-sec/airlock`, the repository before the 2026-11-02 move (task 1.15), so it describes the
+pre-move state; the commands below are written for `posture-sec/airlock`:
 
 | Checked | Result |
 |---|---|
@@ -42,7 +44,7 @@ label, which is step 1's check as well as a guard against running step 5 out of 
 ## 2. Topics
 
 ```
-gh api -X PUT repos/airlock-sec/airlock/topics -f names[]=supply-chain -f names[]=security \
+gh api -X PUT repos/posture-sec/airlock/topics -f names[]=supply-chain -f names[]=security \
   -f names[]=wasm -f names[]=soroban -f names[]=stellar -f names[]=github-actions \
   -f names[]=scanner -f names[]=python -f names[]=devsecops -f names[]=smart-contracts \
   -f names[]=dependency-audit -f names[]=ci
@@ -59,27 +61,27 @@ than appends.
 string Drips matches.
 
 ```
-gh label create "Stellar Wave" --repo airlock-sec/airlock \
+gh label create "Stellar Wave" --repo posture-sec/airlock \
   --color "5319E7" --description "In the Stellar Wave builder program"
 
-gh label create "complexity: trivial" --repo airlock-sec/airlock --color "C2E0C6" \
+gh label create "complexity: trivial" --repo posture-sec/airlock --color "C2E0C6" \
   --description "100 points: one bounded change with obvious acceptance criteria"
-gh label create "complexity: medium"  --repo airlock-sec/airlock --color "FBC2D7" \
+gh label create "complexity: medium"  --repo posture-sec/airlock --color "FBC2D7" \
   --description "150 points: standard change touching several parts of the codebase"
-gh label create "complexity: high"    --repo airlock-sec/airlock --color "D4C5F9" \
+gh label create "complexity: high"    --repo posture-sec/airlock --color "D4C5F9" \
   --description "200 points: complex engineering or a security-critical surface"
 
-gh label create "area: engine"    --repo airlock-sec/airlock --color "0E8A16" --description "collector, runner, fingerprint, suppression, reporters"
-gh label create "area: rules"     --repo airlock-sec/airlock --color "0E8A16" --description "rules/*.toml and the detectors that read them"
-gh label create "area: detectors" --repo airlock-sec/airlock --color "0E8A16" --description "a detector's scope, its fixtures or its rule data decision"
-gh label create "area: action"    --repo airlock-sec/airlock --color "0E8A16" --description "action.yml and the runner's execution environment"
-gh label create "area: ci"        --repo airlock-sec/airlock --color "0E8A16" --description ".github/workflows and scripts/"
-gh label create "area: docs"      --repo airlock-sec/airlock --color "0E8A16" --description "README and the design documents"
-gh label create "area: tests"     --repo airlock-sec/airlock --color "0E8A16" --description "tests/ layout, fixtures, corpus, harnesses"
+gh label create "area: engine"    --repo posture-sec/airlock --color "0E8A16" --description "collector, runner, fingerprint, suppression, reporters"
+gh label create "area: rules"     --repo posture-sec/airlock --color "0E8A16" --description "rules/*.toml and the detectors that read them"
+gh label create "area: detectors" --repo posture-sec/airlock --color "0E8A16" --description "a detector's scope, its fixtures or its rule data decision"
+gh label create "area: action"    --repo posture-sec/airlock --color "0E8A16" --description "action.yml and the runner's execution environment"
+gh label create "area: ci"        --repo posture-sec/airlock --color "0E8A16" --description ".github/workflows and scripts/"
+gh label create "area: docs"      --repo posture-sec/airlock --color "0E8A16" --description "README and the design documents"
+gh label create "area: tests"     --repo posture-sec/airlock --color "0E8A16" --description "tests/ layout, fixtures, corpus, harnesses"
 
-gh label create "type: test" --repo airlock-sec/airlock --color "F9D0C4" \
+gh label create "type: test" --repo posture-sec/airlock --color "F9D0C4" \
   --description "Work whose deliverable is test coverage rather than behavior"
-gh label create "blocked"    --repo airlock-sec/airlock --color "E9969A" \
+gh label create "blocked"    --repo posture-sec/airlock --color "E9969A" \
   --description "Cannot be completed until another issue or task lands"
 ```
 
@@ -114,7 +116,7 @@ no required check, because it blocks every pull request forever, and because the
         "required_approver_count": 1,
         "dismiss_stale_reviews_on_push": true,
         "require_code_owner_review": true,
-        "authorized_actor_names": ["Gabbydunkk"],
+        "authorized_actor_names": ["bolabeatz"],
         "required_review_teams": [],
         "dismissal_restrictions": []
       } },
@@ -133,7 +135,7 @@ no required check, because it blocks every pull request forever, and because the
 Run it as:
 
 ```
-gh api -X POST repos/airlock-sec/airlock/rulesets --input ruleset.json
+gh api -X POST repos/posture-sec/airlock/rulesets --input ruleset.json
 ```
 
 Three notes on choices in that document:
@@ -146,10 +148,12 @@ Three notes on choices in that document:
   before it is listed here, not after.
 - **`integration_id: 15368`** is the GitHub Actions app. Without it the context string is ambiguous
   against checks from other apps.
-- **`authorized_actor_names` lists the account that owns this repository.** `airlock-sec` currently
-  has one member, `Gabbydunkk`, which is what the API reports. If a second maintainer is added, that
-  list is a security boundary and belongs in the same pull request as the change, not in a settings
-  edit nobody reviewed. Task 1.2 (account hardening) is the precondition for trusting it.
+- **`authorized_actor_names` lists the account that owns this repository.** `posture-sec` has one
+  member, `bolabeatz`, with the `admin` role, on the free plan, and org-wide two-factor authentication
+  not required; all four read from the API on 2026-11-02. The pre-move org had a single owner on an
+  account that has since been suspended, which is what task 1.15 records. If a second maintainer is
+  added, that list is a security boundary and belongs in the same pull request as the change, not in a
+  settings edit nobody reviewed. Task 1.2 (account hardening) is the precondition for trusting it.
 
 This closes the file-editable half of task 1.3. `.github/CODEOWNERS` already exists and lists the
 protected paths, which is why `require_code_owner_review` is `true` above: the file has no effect
@@ -176,7 +180,7 @@ gh release create v0.0.1 --prerelease --title "v0.0.1 (pre-release)" --notes-fil
 Draft notes:
 
 > Pre-release, not a version to depend on. `v0.1.0` is gated on Phases 0 to 5 of
-> [`ROADMAP.md`](https://github.com/airlock-sec/airlock/blob/main/ROADMAP.md), and three of the four
+> [`ROADMAP.md`](https://github.com/posture-sec/airlock/blob/main/ROADMAP.md), and three of the four
 > things a consumer would want are not built: the composite Action (`action.yml`, task 4.1), the
 > Stellar-specific detectors (Phase 6) and SARIF output (7.6).
 >

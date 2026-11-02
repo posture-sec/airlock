@@ -5,14 +5,14 @@ labels: Stellar Wave, complexity: medium, area: engine, enhancement
 roadmap: 7.2
 ---
 
-> **Repo context.** `airlock` is a Python 3.11 standard-library-only scanner: `src/airlock/` holds the pipeline (collector, then rules and detectors, then fingerprints and suppressions, then reporters) behind one CLI, and the rules themselves are data in `rules/builtin/*.toml`. The repository being scanned is untrusted input, so the hard rules in [`AGENTS.md`](https://github.com/airlock-sec/airlock/blob/main/AGENTS.md) section 4 are security properties rather than style. [`ROADMAP.md`](https://github.com/airlock-sec/airlock/blob/main/ROADMAP.md) is the source of truth for what is built and what is only a docstring.
+> **Repo context.** `airlock` is a Python 3.11 standard-library-only scanner: `src/airlock/` holds the pipeline (collector, then rules and detectors, then fingerprints and suppressions, then reporters) behind one CLI, and the rules themselves are data in `rules/builtin/*.toml`. The repository being scanned is untrusted input, so the hard rules in [`AGENTS.md`](https://github.com/posture-sec/airlock/blob/main/AGENTS.md) section 4 are security properties rather than style. [`ROADMAP.md`](https://github.com/posture-sec/airlock/blob/main/ROADMAP.md) is the source of truth for what is built and what is only a docstring.
 
 > 🟢 **Unblocked.** The collector already records gitlinks, so this is a decision about what a scan says about them plus the code and fixtures for that decision. No other open issue is involved.
 
 ## Problem
 
 A tracked submodule contributes nothing to a scan. In
-[`src/airlock/collector.py`](https://github.com/airlock-sec/airlock/blob/main/src/airlock/collector.py),
+[`src/airlock/collector.py`](https://github.com/posture-sec/airlock/blob/main/src/airlock/collector.py),
 an index entry with mode `160000` yields one `submodule-present` finding at INFO and the path is
 returned with `skip_reason = SKIP_SUBMODULE`, so no file beneath it is ever read. `git ls-files`
 reports the gitlink and nothing inside it, which is correct git behaviour and means the entire
@@ -71,12 +71,12 @@ what the checkout handed you). Also out: history scanning of unreachable gitlink
 
 ## Tech stack
 
-- Runtime: Python 3.11, standard library only. [`AGENTS.md`](https://github.com/airlock-sec/airlock/blob/main/AGENTS.md) section 4 forbids adding a runtime dependency, and a scan never touches the network, so a helper library is not an option here.
-- Code: [`src/airlock/collector.py`](https://github.com/airlock-sec/airlock/blob/main/src/airlock/collector.py), which emits `submodule-present` and carries the `SKIP_SUBMODULE` reason, and {L('src/airlock/policy.py')} for the state-finding side.
-- Existing test to extend: `test_a_gitlink_yields_submodule_present` in [`tests/unit/test_collector.py`](https://github.com/airlock-sec/airlock/blob/main/tests/unit/test_collector.py).
+- Runtime: Python 3.11, standard library only. [`AGENTS.md`](https://github.com/posture-sec/airlock/blob/main/AGENTS.md) section 4 forbids adding a runtime dependency, and a scan never touches the network, so a helper library is not an option here.
+- Code: [`src/airlock/collector.py`](https://github.com/posture-sec/airlock/blob/main/src/airlock/collector.py), which emits `submodule-present` and carries the `SKIP_SUBMODULE` reason, and {L('src/airlock/policy.py')} for the state-finding side.
+- Existing test to extend: `test_a_gitlink_yields_submodule_present` in [`tests/unit/test_collector.py`](https://github.com/posture-sec/airlock/blob/main/tests/unit/test_collector.py).
 - A gitlink records a mode, a path and a commit; the URL lives in `.gitmodules`, which is a separate read and may disagree with the index. Say which one a finding names.
-- Protected path: [`src/airlock/collector.py`](https://github.com/airlock-sec/airlock/blob/main/src/airlock/collector.py) is fail-closed machinery. A change there must not turn a skip into a silent pass, and needs owner review.
+- Protected path: [`src/airlock/collector.py`](https://github.com/posture-sec/airlock/blob/main/src/airlock/collector.py) is fail-closed machinery. A change there must not turn a skip into a silent pass, and needs owner review.
 
 ### **Contact & Support**
-- [`SUPPORT.md`](https://github.com/airlock-sec/airlock/blob/main/SUPPORT.md) — where to ask, the commands CI runs, and the rules that most often get a pull request rejected
-- [`SECURITY.md`](https://github.com/airlock-sec/airlock/blob/main/SECURITY.md) — private disclosure only; never open an issue about a bypass
+- [`SUPPORT.md`](https://github.com/posture-sec/airlock/blob/main/SUPPORT.md) — where to ask, the commands CI runs, and the rules that most often get a pull request rejected
+- [`SECURITY.md`](https://github.com/posture-sec/airlock/blob/main/SECURITY.md) — private disclosure only; never open an issue about a bypass

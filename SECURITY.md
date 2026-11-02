@@ -6,7 +6,7 @@ clean. Report vulnerabilities in Airlock itself, not through a public issue.
 ## Reporting
 
 Open a private security advisory at
-<https://github.com/airlock-sec/airlock/security/advisories/new>. Include the commit you
+<https://github.com/posture-sec/airlock/security/advisories/new>. Include the commit you
 tested, the mode (`pr`, `push` or `full`), and the smallest repository or fixture that
 shows the problem. Expect an acknowledgement within five business days.
 

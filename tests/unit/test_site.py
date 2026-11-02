@@ -27,7 +27,7 @@ from airlock.rules import apply_patterns, cap_findings, load_rules
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SITE = REPO_ROOT / "site"
 WORKFLOW = REPO_ROOT / ".github" / "workflows" / "pages.yml"
-BASE_URL = "https://airlock-sec.github.io/airlock/"
+BASE_URL = "https://posture-sec.github.io/airlock/"
 
 PAGES = ("index.html", "usage.html", "rules.html", "trust.html")
 

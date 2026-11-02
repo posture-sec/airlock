@@ -5,7 +5,7 @@ labels: Stellar Wave, complexity: medium, area: ci, type: test
 roadmap: 7.8
 ---
 
-> **Repo context.** `airlock` is a Python 3.11 standard-library-only scanner: `src/airlock/` holds the pipeline (collector, then rules and detectors, then fingerprints and suppressions, then reporters) behind one CLI, and the rules themselves are data in `rules/builtin/*.toml`. The repository being scanned is untrusted input, so the hard rules in [`AGENTS.md`](https://github.com/airlock-sec/airlock/blob/main/AGENTS.md) section 4 are security properties rather than style. [`ROADMAP.md`](https://github.com/airlock-sec/airlock/blob/main/ROADMAP.md) is the source of truth for what is built and what is only a docstring.
+> **Repo context.** `airlock` is a Python 3.11 standard-library-only scanner: `src/airlock/` holds the pipeline (collector, then rules and detectors, then fingerprints and suppressions, then reporters) behind one CLI, and the rules themselves are data in `rules/builtin/*.toml`. The repository being scanned is untrusted input, so the hard rules in [`AGENTS.md`](https://github.com/posture-sec/airlock/blob/main/AGENTS.md) section 4 are security properties rather than style. [`ROADMAP.md`](https://github.com/posture-sec/airlock/blob/main/ROADMAP.md) is the source of truth for what is built and what is only a docstring.
 
 > 🟢 **Unblocked.** The collector is shipped and green (2.2, 2.14), and `ubuntu-latest` CI already runs on every pull request, so adding a second runner is the only infrastructure this needs.
 
@@ -13,9 +13,9 @@ roadmap: 7.8
 
 Every test in the suite runs on Linux. The collector takes paths from `git ls-files -z --stage` and
 turns them into strings with `os.fsdecode` at
-[`src/airlock/collector.py:147`](https://github.com/airlock-sec/airlock/blob/main/src/airlock/collector.py),
+[`src/airlock/collector.py:147`](https://github.com/posture-sec/airlock/blob/main/src/airlock/collector.py),
 then opens them relative to the repository root, and
-[`src/airlock/roles.py`](https://github.com/airlock-sec/airlock/blob/main/src/airlock/roles.py)
+[`src/airlock/roles.py`](https://github.com/posture-sec/airlock/blob/main/src/airlock/roles.py)
 implements a hand-written glob matcher that splits on `/`. All of that is correct on a
 case-sensitive filesystem with no device namespace. None of it has been run anywhere else.
 `ROADMAP.md` 7.8 exists for exactly this gap and is unticked.
@@ -29,7 +29,7 @@ the device rather than the file, and the null device reads as zero bytes.
 
 If that holds, a scan on a Windows runner reports a clean file it never read, which is the exact
 shape this project was written against: `PRD.md` Appendix B case 7 is a payload under a directory the
-old script skipped, and the hard rule in [`AGENTS.md`](https://github.com/airlock-sec/airlock/blob/main/AGENTS.md)
+old script skipped, and the hard rule in [`AGENTS.md`](https://github.com/posture-sec/airlock/blob/main/AGENTS.md)
 section 4 is that nothing is skipped silently. It would also mean the collector's size and content
 checks are being applied to an empty device.
 
@@ -70,12 +70,12 @@ on filesystems other than NTFS; and any change to what the Linux job runs.
 
 ## Tech stack
 
-- Runtime: Python 3.11, standard library only. [`AGENTS.md`](https://github.com/airlock-sec/airlock/blob/main/AGENTS.md) section 4 forbids adding a runtime dependency, and a scan never touches the network, so a helper library is not an option here.
-- Code: [`src/airlock/collector.py`](https://github.com/airlock-sec/airlock/blob/main/src/airlock/collector.py), specifically the `os.fsdecode` call on the git index path, and the read that follows it.
-- Tests: [`tests/unit/test_collector.py`](https://github.com/airlock-sec/airlock/blob/main/tests/unit/test_collector.py) for the platform-independent cases, and a new job in [`.github/workflows/ci.yml`](https://github.com/airlock-sec/airlock/blob/main/.github/workflows/ci.yml) on `windows-latest` for the ones that are not.
+- Runtime: Python 3.11, standard library only. [`AGENTS.md`](https://github.com/posture-sec/airlock/blob/main/AGENTS.md) section 4 forbids adding a runtime dependency, and a scan never touches the network, so a helper library is not an option here.
+- Code: [`src/airlock/collector.py`](https://github.com/posture-sec/airlock/blob/main/src/airlock/collector.py), specifically the `os.fsdecode` call on the git index path, and the read that follows it.
+- Tests: [`tests/unit/test_collector.py`](https://github.com/posture-sec/airlock/blob/main/tests/unit/test_collector.py) for the platform-independent cases, and a new job in [`.github/workflows/ci.yml`](https://github.com/posture-sec/airlock/blob/main/.github/workflows/ci.yml) on `windows-latest` for the ones that are not.
 - The device-name hypothesis in the issue body has to be confirmed or refuted on a real runner, not argued from documentation. Either outcome is a result; record which.
 - Expect no production change if the hypothesis is refuted. The deliverable is the test and the recorded answer.
 
 ### **Contact & Support**
-- [`SUPPORT.md`](https://github.com/airlock-sec/airlock/blob/main/SUPPORT.md) — where to ask, the commands CI runs, and the rules that most often get a pull request rejected
-- [`SECURITY.md`](https://github.com/airlock-sec/airlock/blob/main/SECURITY.md) — private disclosure only; never open an issue about a bypass
+- [`SUPPORT.md`](https://github.com/posture-sec/airlock/blob/main/SUPPORT.md) — where to ask, the commands CI runs, and the rules that most often get a pull request rejected
+- [`SECURITY.md`](https://github.com/posture-sec/airlock/blob/main/SECURITY.md) — private disclosure only; never open an issue about a bypass

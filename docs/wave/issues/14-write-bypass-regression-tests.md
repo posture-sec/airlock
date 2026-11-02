@@ -5,7 +5,7 @@ labels: Stellar Wave, complexity: medium, area: tests, type: test, blocked
 roadmap: 3.9
 ---
 
-> **Repo context.** `airlock` is a Python 3.11 standard-library-only scanner: `src/airlock/` holds the pipeline (collector, then rules and detectors, then fingerprints and suppressions, then reporters) behind one CLI, and the rules themselves are data in `rules/builtin/*.toml`. The repository being scanned is untrusted input, so the hard rules in [`AGENTS.md`](https://github.com/airlock-sec/airlock/blob/main/AGENTS.md) section 4 are security properties rather than style. [`ROADMAP.md`](https://github.com/airlock-sec/airlock/blob/main/ROADMAP.md) is the source of truth for what is built and what is only a docstring.
+> **Repo context.** `airlock` is a Python 3.11 standard-library-only scanner: `src/airlock/` holds the pipeline (collector, then rules and detectors, then fingerprints and suppressions, then reporters) behind one CLI, and the rules themselves are data in `rules/builtin/*.toml`. The repository being scanned is untrusted input, so the hard rules in [`AGENTS.md`](https://github.com/posture-sec/airlock/blob/main/AGENTS.md) section 4 are security properties rather than style. [`ROADMAP.md`](https://github.com/posture-sec/airlock/blob/main/ROADMAP.md) is the source of truth for what is built and what is only a docstring.
 
 > ⛔ **Blocked by #{{issue:port-text-side-high-rules}} and by task 6.4.** Two of the seven shapes stay invisible until rules exist for them: a payload under `vendor/` at role `source`, which none of the seven `cfg-*` rules reads, and a `.cargo/config.toml` `runner`, which has no role and no rule at all. **The other five are unblocked right now**, and they are the larger half of the work: cases 1 to 5 already fail closed on the twelve shipped rules, nothing locks that in, and a rule edit could reopen one of them silently. A pull request that lands the harness and those five cases is a complete contribution on its own.
 
@@ -13,8 +13,8 @@ roadmap: 3.9
 
 Task 0.4 proved the bypasses are real. It ran each of the seven shapes from `PRD.md` Appendix B as a
 commit in a scratch repository against the actual `malware_scan.py`, and all seven exited 0, which
-passes the job. That evidence lives in [`scripts/bypass_probe.py`](https://github.com/airlock-sec/airlock/blob/main/scripts/bypass_probe.py)
-and in the PRD, and it is evidence about *the other scanner*. [`tests/bypass/`](https://github.com/airlock-sec/airlock/blob/main/tests/bypass)
+passes the job. That evidence lives in [`scripts/bypass_probe.py`](https://github.com/posture-sec/airlock/blob/main/scripts/bypass_probe.py)
+and in the PRD, and it is evidence about *the other scanner*. [`tests/bypass/`](https://github.com/posture-sec/airlock/blob/main/tests/bypass)
 is an empty directory with a `.gitkeep`, so nothing here says that Airlock still closes those shapes
 after the next edit.
 
@@ -70,7 +70,7 @@ honestly until it is a test.
    commented-out entry in a list that names the blocking task, is honest; a green check on a shape the
    tool cannot see is not. If instead you land the rules first, do it as the other issue and come
    back here.
-6. **Correct the dependency line while you are in the roadmap.** [`ROADMAP.md`](https://github.com/airlock-sec/airlock/blob/main/ROADMAP.md)
+6. **Correct the dependency line while you are in the roadmap.** [`ROADMAP.md`](https://github.com/posture-sec/airlock/blob/main/ROADMAP.md)
    gives 3.9 "Deps: 0.4, 3.1, 3.4", but section 2 of the same file explains that two of the seven
    cases are invisible until 3.6 lands. Add 3.6 (or the two slices of it) to that line so the graph
    matches the reasoning, and update the "six-rule set shipped today" phrasing, which is stale: the
@@ -95,12 +95,12 @@ scope for this issue's own pull request either; they are in scope for the issue 
 
 ## Tech stack
 
-- Runtime: Python 3.11, standard library only. [`AGENTS.md`](https://github.com/airlock-sec/airlock/blob/main/AGENTS.md) section 4 forbids adding a runtime dependency, and a scan never touches the network, so a helper library is not an option here.
-- Harness to split: [`scripts/bypass_probe.py`](https://github.com/airlock-sec/airlock/blob/main/scripts/bypass_probe.py) already holds the seven cases as data (`CASES`, `build`, `commit`, `scan`), and its `--script` contract must keep working.
-- Destination: [`tests/bypass`](https://github.com/airlock-sec/airlock/blob/main/tests/bypass), which holds a `.gitkeep` today.
-- Payloads are assembled from fragments at test time, the way the probe does it. Committing a live-looking payload fails [`AGENTS.md`](https://github.com/airlock-sec/airlock/blob/main/AGENTS.md) section 4 and will close the pull request.
+- Runtime: Python 3.11, standard library only. [`AGENTS.md`](https://github.com/posture-sec/airlock/blob/main/AGENTS.md) section 4 forbids adding a runtime dependency, and a scan never touches the network, so a helper library is not an option here.
+- Harness to split: [`scripts/bypass_probe.py`](https://github.com/posture-sec/airlock/blob/main/scripts/bypass_probe.py) already holds the seven cases as data (`CASES`, `build`, `commit`, `scan`), and its `--script` contract must keep working.
+- Destination: [`tests/bypass`](https://github.com/posture-sec/airlock/blob/main/tests/bypass), which holds a `.gitkeep` today.
+- Payloads are assembled from fragments at test time, the way the probe does it. Committing a live-looking payload fails [`AGENTS.md`](https://github.com/posture-sec/airlock/blob/main/AGENTS.md) section 4 and will close the pull request.
 - Run before pushing: `python -m pytest tests/bypass` and `python -m pytest tests/unit/test_collector.py`, since a bypass case that needs a real git tree is the one place the collector runs for real here.
 
 ### **Contact & Support**
-- [`SUPPORT.md`](https://github.com/airlock-sec/airlock/blob/main/SUPPORT.md) — where to ask, the commands CI runs, and the rules that most often get a pull request rejected
-- [`SECURITY.md`](https://github.com/airlock-sec/airlock/blob/main/SECURITY.md) — private disclosure only; never open an issue about a bypass
+- [`SUPPORT.md`](https://github.com/posture-sec/airlock/blob/main/SUPPORT.md) — where to ask, the commands CI runs, and the rules that most often get a pull request rejected
+- [`SECURITY.md`](https://github.com/posture-sec/airlock/blob/main/SECURITY.md) — private disclosure only; never open an issue about a bypass
