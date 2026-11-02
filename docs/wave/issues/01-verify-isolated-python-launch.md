@@ -5,7 +5,7 @@ labels: Stellar Wave, complexity: trivial, area: action, enhancement, good first
 roadmap: 0.8
 ---
 
-> **Repo context.** `airlock` is a Python 3.11 standard-library-only scanner: `src/airlock/` holds the pipeline (collector, then rules and detectors, then fingerprints and suppressions, then reporters) behind one CLI, and the rules themselves are data in `rules/builtin/*.toml`. The repository being scanned is untrusted input, so the hard rules in [`AGENTS.md`](https://github.com/airlock-sec/airlock/blob/main/AGENTS.md) section 4 are security properties rather than style. [`ROADMAP.md`](https://github.com/airlock-sec/airlock/blob/main/ROADMAP.md) is the source of truth for what is built and what is only a docstring.
+> **Repo context.** `airlock` is a Python 3.11 standard-library-only scanner: `src/airlock/` holds the pipeline (collector, then rules and detectors, then fingerprints and suppressions, then reporters) behind one CLI, and the rules themselves are data in `rules/builtin/*.toml`. The repository being scanned is untrusted input, so the hard rules in [`AGENTS.md`](https://github.com/posture-sec/airlock/blob/main/AGENTS.md) section 4 are security properties rather than style. [`ROADMAP.md`](https://github.com/posture-sec/airlock/blob/main/ROADMAP.md) is the source of truth for what is built and what is only a docstring.
 
 > 🟢 **Unblocked.** This is a one-hour verification task with no code change and no dependency on any other open issue. It is the single highest-leverage row in the tracker: task 4.1, the composite Action, lists it as a dependency.
 
@@ -13,7 +13,7 @@ roadmap: 0.8
 
 The design distributes Airlock as a composite GitHub Action that runs the scanner out of
 `$GITHUB_ACTION_PATH`, the pinned copy of *this* repository, and never out of the checkout being
-scanned. [`ARCHITECTURE.md`](https://github.com/airlock-sec/airlock/blob/main/ARCHITECTURE.md)
+scanned. [`ARCHITECTURE.md`](https://github.com/posture-sec/airlock/blob/main/ARCHITECTURE.md)
 section 10 sketches the launch as:
 
 ```
@@ -24,7 +24,7 @@ python3 -I -c 'import sys; sys.path.insert(0, sys.argv.pop(1)); from airlock.cli
 directory, which is why the path has to arrive through `argv`. Every part of that sentence is a
 claim about CPython and Actions behaviour that nobody has executed on a runner. It is marked
 `[Unverified: confirm with a scratch workflow, task 0.8]` in the design, and
-[`AGENTS.md`](https://github.com/airlock-sec/airlock/blob/main/AGENTS.md) section 10 tells a
+[`AGENTS.md`](https://github.com/posture-sec/airlock/blob/main/AGENTS.md) section 10 tells a
 contributor to stop when a task depends on an unverified item.
 
 Until it is confirmed, 4.1 cannot be scoped honestly: if `-I` plus an `argv` path insert does not
@@ -69,12 +69,12 @@ it instead of landing the change here.
 
 ## Tech stack
 
-- Runtime: Python 3.11, standard library only. [`AGENTS.md`](https://github.com/airlock-sec/airlock/blob/main/AGENTS.md) section 4 forbids adding a runtime dependency, and a scan never touches the network, so a helper library is not an option here.
-- Surface: a scratch repository and one throwaway workflow. Nothing in [`src/airlock`](https://github.com/airlock-sec/airlock/blob/main/src/airlock) changes; the launch line imports [`src/airlock/cli.py`](https://github.com/airlock-sec/airlock/blob/main/src/airlock/cli.py)'s `main` from `$GITHUB_ACTION_PATH/src`, and that import path is the thing under test.
-- Design text being verified: [`ARCHITECTURE.md`](https://github.com/airlock-sec/airlock/blob/main/ARCHITECTURE.md) section 10, which carries the `[Unverified]` marker this issue removes.
+- Runtime: Python 3.11, standard library only. [`AGENTS.md`](https://github.com/posture-sec/airlock/blob/main/AGENTS.md) section 4 forbids adding a runtime dependency, and a scan never touches the network, so a helper library is not an option here.
+- Surface: a scratch repository and one throwaway workflow. Nothing in [`src/airlock`](https://github.com/posture-sec/airlock/blob/main/src/airlock) changes; the launch line imports [`src/airlock/cli.py`](https://github.com/posture-sec/airlock/blob/main/src/airlock/cli.py)'s `main` from `$GITHUB_ACTION_PATH/src`, and that import path is the thing under test.
+- Design text being verified: [`ARCHITECTURE.md`](https://github.com/posture-sec/airlock/blob/main/ARCHITECTURE.md) section 10, which carries the `[Unverified]` marker this issue removes.
 - Run before pushing: `python -m airlock scan --mode full .` locally, then read the runner's log for the module path the child process actually resolved.
 - Evidence this issue asks for is a runner log and a shadowing test, not a green pytest run. Paste the log into the pull request.
 
 ### **Contact & Support**
-- [`SUPPORT.md`](https://github.com/airlock-sec/airlock/blob/main/SUPPORT.md) — where to ask, the commands CI runs, and the rules that most often get a pull request rejected
-- [`SECURITY.md`](https://github.com/airlock-sec/airlock/blob/main/SECURITY.md) — private disclosure only; never open an issue about a bypass
+- [`SUPPORT.md`](https://github.com/posture-sec/airlock/blob/main/SUPPORT.md) — where to ask, the commands CI runs, and the rules that most often get a pull request rejected
+- [`SECURITY.md`](https://github.com/posture-sec/airlock/blob/main/SECURITY.md) — private disclosure only; never open an issue about a bypass

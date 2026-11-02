@@ -5,14 +5,14 @@ labels: Stellar Wave, complexity: high, area: rules, enhancement
 roadmap: 3.6
 ---
 
-> **Repo context.** `airlock` is a Python 3.11 standard-library-only scanner: `src/airlock/` holds the pipeline (collector, then rules and detectors, then fingerprints and suppressions, then reporters) behind one CLI, and the rules themselves are data in `rules/builtin/*.toml`. The repository being scanned is untrusted input, so the hard rules in [`AGENTS.md`](https://github.com/airlock-sec/airlock/blob/main/AGENTS.md) section 4 are security properties rather than style. [`ROADMAP.md`](https://github.com/airlock-sec/airlock/blob/main/ROADMAP.md) is the source of truth for what is built and what is only a docstring.
+> **Repo context.** `airlock` is a Python 3.11 standard-library-only scanner: `src/airlock/` holds the pipeline (collector, then rules and detectors, then fingerprints and suppressions, then reporters) behind one CLI, and the rules themselves are data in `rules/builtin/*.toml`. The repository being scanned is untrusted input, so the hard rules in [`AGENTS.md`](https://github.com/posture-sec/airlock/blob/main/AGENTS.md) section 4 are security properties rather than style. [`ROADMAP.md`](https://github.com/posture-sec/airlock/blob/main/ROADMAP.md) is the source of truth for what is built and what is only a docstring.
 
 > 🟢 **Unblocked.** It needs the shipped engine and role resolver only. It is the second of two slices of task 3.6; the other covers the text-side families and can proceed in parallel, since the two touch different rule files and different roles.
 
 ## Problem
 
 Nothing in the shipped rule set reads a GitHub workflow file.
-[`rules/roles.toml`](https://github.com/airlock-sec/airlock/blob/main/rules/roles.toml) declares two
+[`rules/roles.toml`](https://github.com/posture-sec/airlock/blob/main/rules/roles.toml) declares two
 roles, `tooling-config` (five build-config globs) and `editor-autorun` (`.vscode/tasks.json`), and
 `.github/workflows/*.yml` resolves to `doc` by extension fallback, which no pattern rule applies to.
 So the four families `ARCHITECTURE.md` 9.6 lists for the CI surface are all absent:
@@ -28,7 +28,7 @@ So the four families `ARCHITECTURE.md` 9.6 lists for the CI surface are all abse
 The third one is the shape PolinRider used, and the fourth is the reason `editor-autorun` is a
 sensitive role at all. Both are currently invisible to the tool built to catch them, and the reason
 is coverage rather than judgement: `ARCHITECTURE.md` 9.6 already specifies these rules, and
-[`src/airlock/detectors/builtin_patterns.py`](https://github.com/airlock-sec/airlock/blob/main/src/airlock/detectors/builtin_patterns.py)
+[`src/airlock/detectors/builtin_patterns.py`](https://github.com/posture-sec/airlock/blob/main/src/airlock/detectors/builtin_patterns.py)
 is a docstring.
 
 Note that `pull_request_target` plus a head checkout is the class of weakness this repository's own
@@ -38,7 +38,7 @@ design document worries about in section 11, so the rule has a test corpus two s
 
 1. **Give the files a role first.** Add the workflow, package-manifest and hook paths to
    `rules/roles.toml`, and decide which of them are `SENSITIVE_ROLES` in
-   [`src/airlock/roles.py`](https://github.com/airlock-sec/airlock/blob/main/src/airlock/roles.py),
+   [`src/airlock/roles.py`](https://github.com/posture-sec/airlock/blob/main/src/airlock/roles.py),
    which is what makes an unreadable or over-cap file there HIGH rather than WARN. That list is a
    security decision with a false-positive cost, so state the reasoning. A new role name is
    automatically visible to the rule loader's unknown-role cross-check from 2.5, so a rule pointing at
@@ -79,12 +79,12 @@ rules.
 
 ## Tech stack
 
-- Runtime: Python 3.11, standard library only. [`AGENTS.md`](https://github.com/airlock-sec/airlock/blob/main/AGENTS.md) section 4 forbids adding a runtime dependency, and a scan never touches the network, so a helper library is not an option here.
-- Roles first: [`rules/roles.toml`](https://github.com/airlock-sec/airlock/blob/main/rules/roles.toml) and `SENSITIVE_ROLES` in [`src/airlock/roles.py`](https://github.com/airlock-sec/airlock/blob/main/src/airlock/roles.py). A workflow file resolves to `doc` today, which is why no rule reads one.
-- Rules: a new file under [`rules/builtin`](https://github.com/airlock-sec/airlock/blob/main/rules/builtin), with fixtures in [`tests/fixtures`](https://github.com/airlock-sec/airlock/blob/main/tests/fixtures). There is no YAML parser in this build and ADR-007 keeps it out of v0.1, so these are raw text patterns over lines, not parsed documents.
-- Self-scan consequence: [`.github/workflows/ci.yml`](https://github.com/airlock-sec/airlock/blob/main/.github/workflows/ci.yml) runs the scanner over this repository's own workflows, so a new rule fires here first. That is a true positive or a false positive to argue, not something to suppress yourself.
+- Runtime: Python 3.11, standard library only. [`AGENTS.md`](https://github.com/posture-sec/airlock/blob/main/AGENTS.md) section 4 forbids adding a runtime dependency, and a scan never touches the network, so a helper library is not an option here.
+- Roles first: [`rules/roles.toml`](https://github.com/posture-sec/airlock/blob/main/rules/roles.toml) and `SENSITIVE_ROLES` in [`src/airlock/roles.py`](https://github.com/posture-sec/airlock/blob/main/src/airlock/roles.py). A workflow file resolves to `doc` today, which is why no rule reads one.
+- Rules: a new file under [`rules/builtin`](https://github.com/posture-sec/airlock/blob/main/rules/builtin), with fixtures in [`tests/fixtures`](https://github.com/posture-sec/airlock/blob/main/tests/fixtures). There is no YAML parser in this build and ADR-007 keeps it out of v0.1, so these are raw text patterns over lines, not parsed documents.
+- Self-scan consequence: [`.github/workflows/ci.yml`](https://github.com/posture-sec/airlock/blob/main/.github/workflows/ci.yml) runs the scanner over this repository's own workflows, so a new rule fires here first. That is a true positive or a false positive to argue, not something to suppress yourself.
 - Run before pushing: `python -m pytest tests/unit/test_fixtures.py tests/unit/test_redos.py` and `python -m airlock scan --mode full .`, and quote the self-scan output.
 
 ### **Contact & Support**
-- [`SUPPORT.md`](https://github.com/airlock-sec/airlock/blob/main/SUPPORT.md) — where to ask, the commands CI runs, and the rules that most often get a pull request rejected
-- [`SECURITY.md`](https://github.com/airlock-sec/airlock/blob/main/SECURITY.md) — private disclosure only; never open an issue about a bypass
+- [`SUPPORT.md`](https://github.com/posture-sec/airlock/blob/main/SUPPORT.md) — where to ask, the commands CI runs, and the rules that most often get a pull request rejected
+- [`SECURITY.md`](https://github.com/posture-sec/airlock/blob/main/SECURITY.md) — private disclosure only; never open an issue about a bypass

@@ -5,9 +5,9 @@ labels: Stellar Wave, complexity: high, area: action, enhancement, blocked
 roadmap: 4.1
 ---
 
-> **Repo context.** `airlock` is a Python 3.11 standard-library-only scanner: `src/airlock/` holds the pipeline (collector, then rules and detectors, then fingerprints and suppressions, then reporters) behind one CLI, and the rules themselves are data in `rules/builtin/*.toml`. The repository being scanned is untrusted input, so the hard rules in [`AGENTS.md`](https://github.com/airlock-sec/airlock/blob/main/AGENTS.md) section 4 are security properties rather than style. [`ROADMAP.md`](https://github.com/airlock-sec/airlock/blob/main/ROADMAP.md) is the source of truth for what is built and what is only a docstring.
+> **Repo context.** `airlock` is a Python 3.11 standard-library-only scanner: `src/airlock/` holds the pipeline (collector, then rules and detectors, then fingerprints and suppressions, then reporters) behind one CLI, and the rules themselves are data in `rules/builtin/*.toml`. The repository being scanned is untrusted input, so the hard rules in [`AGENTS.md`](https://github.com/posture-sec/airlock/blob/main/AGENTS.md) section 4 are security properties rather than style. [`ROADMAP.md`](https://github.com/posture-sec/airlock/blob/main/ROADMAP.md) is the source of truth for what is built and what is only a docstring.
 
-> ⛔ **Blocked by #{{issue:verify-isolated-python-launch}}.** Task 0.8 has to run first, because the launch mechanism this Action depends on is marked `[Unverified: confirm with a scratch workflow, task 0.8]` in [`ARCHITECTURE.md`](https://github.com/airlock-sec/airlock/blob/main/ARCHITECTURE.md) section 10, and it is the mechanism that keeps the hard rule "never run scanner code from the scanned checkout" true rather than merely intended. Build nothing on that line until 0.8 records that `python3 -I` plus an explicit `sys.path` insert loads the package from `GITHUB_ACTION_PATH` while a shadowing `src/airlock/` in the repository under scan is ignored. **If 0.8 refutes it**, this issue changes shape: the Action needs a different carrier for the code, which is an owner decision that earns its own row in the decision log, not something to improvise in a pull request.
+> ⛔ **Blocked by #{{issue:verify-isolated-python-launch}}.** Task 0.8 has to run first, because the launch mechanism this Action depends on is marked `[Unverified: confirm with a scratch workflow, task 0.8]` in [`ARCHITECTURE.md`](https://github.com/posture-sec/airlock/blob/main/ARCHITECTURE.md) section 10, and it is the mechanism that keeps the hard rule "never run scanner code from the scanned checkout" true rather than merely intended. Build nothing on that line until 0.8 records that `python3 -I` plus an explicit `sys.path` insert loads the package from `GITHUB_ACTION_PATH` while a shadowing `src/airlock/` in the repository under scan is ignored. **If 0.8 refutes it**, this issue changes shape: the Action needs a different carrier for the code, which is an owner decision that earns its own row in the decision log, not something to improvise in a pull request.
 
 ## Problem
 
@@ -17,7 +17,7 @@ for any of the five Stellar repos to adopt it. Each of them today runs a copy-pa
 `.github/scripts/malware_scan.py`, which is the exact artifact this project exists to replace:
 `PRD.md` 2.3 records that all seven of
 that script's bypasses were run on 2026-10-27 and every one exits 0. The replacement cannot be
-adopted, only described, until a consumer can write `uses: airlock-sec/airlock@<full sha>` and get a
+adopted, only described, until a consumer can write `uses: posture-sec/airlock@<full sha>` and get a
 check.
 
 The CLI half is already Action-shaped, which is why this is one file and its contract rather than
@@ -28,7 +28,7 @@ engine work:
   never silently gets the wrong policy source.
 - `--format github` writes workflow annotations, HIGH first, with the 50/25/10 per-severity caps and
   a line saying how many were withheld.
-- When `GITHUB_STEP_SUMMARY` is set, [`src/airlock/cli.py`](https://github.com/airlock-sec/airlock/blob/main/src/airlock/cli.py)
+- When `GITHUB_STEP_SUMMARY` is set, [`src/airlock/cli.py`](https://github.com/posture-sec/airlock/blob/main/src/airlock/cli.py)
   appends the summary render to it, on purpose separately from `--format`: the annotation stream is
   for the author and the summary is for the reviewer who must see every HIGH without opening a log.
 - `rules_root()` already resolves the checkout layout the pinned Action uses (`rules/` two levels
@@ -92,12 +92,12 @@ output (7.6), and any change to how the reporters format findings.
 
 ## Tech stack
 
-- Runtime: Python 3.11, standard library only. [`AGENTS.md`](https://github.com/airlock-sec/airlock/blob/main/AGENTS.md) section 4 forbids adding a runtime dependency, and a scan never touches the network, so a helper library is not an option here.
+- Runtime: Python 3.11, standard library only. [`AGENTS.md`](https://github.com/posture-sec/airlock/blob/main/AGENTS.md) section 4 forbids adding a runtime dependency, and a scan never touches the network, so a helper library is not an option here.
 - New file: `action.yml`, composite, at the repository root. It is a protected path and listed in `.github/CODEOWNERS`.
-- Code it calls: `main` in [`src/airlock/cli.py`](https://github.com/airlock-sec/airlock/blob/main/src/airlock/cli.py), the `EVENT_MODES` table that maps an event name to a trust model, and `rules_root`, which already resolves the `$GITHUB_ACTION_PATH` layout.
+- Code it calls: `main` in [`src/airlock/cli.py`](https://github.com/posture-sec/airlock/blob/main/src/airlock/cli.py), the `EVENT_MODES` table that maps an event name to a trust model, and `rules_root`, which already resolves the `$GITHUB_ACTION_PATH` layout.
 - No `pip install` in the Action and no fetch: the scanner code comes from the pinned Action's own checkout, which is the whole point of the `-I` launch line and the reason this issue waits on the launch experiment.
-- Design text to update in the same pull request: [`ARCHITECTURE.md`](https://github.com/airlock-sec/airlock/blob/main/ARCHITECTURE.md) 10 and 11. Caller-side usage docs are task 4.2 and stay out of scope.
+- Design text to update in the same pull request: [`ARCHITECTURE.md`](https://github.com/posture-sec/airlock/blob/main/ARCHITECTURE.md) 10 and 11. Caller-side usage docs are task 4.2 and stay out of scope.
 
 ### **Contact & Support**
-- [`SUPPORT.md`](https://github.com/airlock-sec/airlock/blob/main/SUPPORT.md) — where to ask, the commands CI runs, and the rules that most often get a pull request rejected
-- [`SECURITY.md`](https://github.com/airlock-sec/airlock/blob/main/SECURITY.md) — private disclosure only; never open an issue about a bypass
+- [`SUPPORT.md`](https://github.com/posture-sec/airlock/blob/main/SUPPORT.md) — where to ask, the commands CI runs, and the rules that most often get a pull request rejected
+- [`SECURITY.md`](https://github.com/posture-sec/airlock/blob/main/SECURITY.md) — private disclosure only; never open an issue about a bypass

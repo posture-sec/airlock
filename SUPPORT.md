@@ -7,7 +7,7 @@ pull request is reviewable.
 
 | Need | Go to |
 |---|---|
-| A question about using the scanner, or a false positive on a repository you scanned | [Open an issue](https://github.com/airlock-sec/airlock/issues/new/choose). The two templates ask for the mode, the commit and the rule id. |
+| A question about using the scanner, or a false positive on a repository you scanned | [Open an issue](https://github.com/posture-sec/airlock/issues/new/choose). The two templates ask for the mode, the commit and the rule id. |
 | A way to make the scanner report clean when it should not | **Do not open an issue.** Follow [`SECURITY.md`](SECURITY.md) and file a private advisory. |
 | A stalled or rejected application to work on an issue | Comment on the issue. The maintainer answers there. |
 | Anything about the Drips Wave process itself | The Drips docs for [participating in a Wave](https://docs.drips.network/wave/maintainers/participating-in-a-wave/), then the Drips Discord. |

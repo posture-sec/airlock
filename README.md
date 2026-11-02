@@ -4,7 +4,7 @@
 
 **Supply-chain scanning for Stellar and Soroban repositories**
 
-[![CI](https://github.com/airlock-sec/airlock/actions/workflows/ci.yml/badge.svg)](https://github.com/airlock-sec/airlock/actions/workflows/ci.yml)
+[![CI](https://github.com/posture-sec/airlock/actions/workflows/ci.yml/badge.svg)](https://github.com/posture-sec/airlock/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml)
 [![Runtime dependencies](https://img.shields.io/badge/runtime%20dependencies-0-green)](pyproject.toml)
@@ -14,7 +14,7 @@ compromise open-source Stellar projects: payloads appended to JS and TS build to
 editor tasks that run on folder open, and Wasm artifacts that do not match the build they claim.
 It is a scanner for a specific attack class, not a general-purpose antivirus.
 
-[Documentation site](https://airlock-sec.github.io/airlock/) · [Quick start](#quick-start) ·
+[Documentation site](https://posture-sec.github.io/airlock/) · [Quick start](#quick-start) ·
 [What it checks](#what-it-checks) · [Trust model](#trust-model) · [Limits](#limits) ·
 [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
@@ -31,7 +31,7 @@ installer does not exist yet.
 | Not built yet | the composite GitHub Action (`action.yml`), the Soroban-side detectors, the build-script and native-binary rules, SARIF output |
 | Usable now | as a CLI, from a checkout or an installed wheel, on any git repository |
 
-There is no `uses: airlock-sec/airlock@…` line to copy into a workflow, and no package index
+There is no `uses: posture-sec/airlock@…` line to copy into a workflow, and no package index
 release. Do not treat a scan from this build as complete coverage: a clean report means nothing
 matched the twenty-two rules that ship, which is a narrower claim than "no compromise found". Track
 what exists in [ROADMAP.md](ROADMAP.md) and read the design in
@@ -152,7 +152,7 @@ within 30 days at the latest, and cannot cover a scanner-state finding at all.
 Python 3.11 or newer, standard library only.
 
 ```bash
-git clone https://github.com/airlock-sec/airlock.git
+git clone https://github.com/posture-sec/airlock.git
 cd airlock
 python3 -m venv .venv && . .venv/bin/activate
 pip install .
@@ -203,7 +203,7 @@ A scan that could not run never reports success.
 `action.yml` is task 4.1 and does not exist. The intended consumer snippet, once it does:
 
 ```yaml
-- uses: airlock-sec/airlock@<full commit sha>   # pin the SHA, not a tag
+- uses: posture-sec/airlock@<full commit sha>   # pin the SHA, not a tag
   with:
     mode: pr
 ```
@@ -215,7 +215,7 @@ check: without that, a pull request that deletes the scan step simply never runs
 
 | Document | What it answers |
 |---|---|
-| [Documentation site](https://airlock-sec.github.io/airlock/) | overview, usage, the rule reference and the trust model, rendered from the rules that ship |
+| [Documentation site](https://posture-sec.github.io/airlock/) | overview, usage, the rule reference and the trust model, rendered from the rules that ship |
 | [`PRD.md`](PRD.md) | requirements, the seven bypass measurements in Appendix B, open questions |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | components, data models, the fail-closed table, ADRs, red-team review |
 | [`ARCHITECTURE_ESSENTIALS.md`](ARCHITECTURE_ESSENTIALS.md) | the hard rules, in one screen |
@@ -236,13 +236,13 @@ One rule earns more care than the rest. Airlock's job is to make a claim about a
 contribution that weakens a check, a test or a skip is not a smaller change than one that adds a
 feature. Protected paths are listed in [`CONTRIBUTING.md`](CONTRIBUTING.md) and need owner review.
 
-Contributor-sized work is filed in the [issue tracker](https://github.com/airlock-sec/airlock/issues)
+Contributor-sized work is filed in the [issue tracker](https://github.com/posture-sec/airlock/issues)
 and names the roadmap task it closes; [`ROADMAP.md`](ROADMAP.md) stays the full queue and the source
 of truth.
 
 ## Community and support
 
-- Ask a question or report a false positive through [GitHub Issues](https://github.com/airlock-sec/airlock/issues).
+- Ask a question or report a false positive through [GitHub Issues](https://github.com/posture-sec/airlock/issues).
 - Report a vulnerability privately, per [`SECURITY.md`](SECURITY.md).
 - [`SUPPORT.md`](SUPPORT.md) carries the channels, the commands CI runs, and the house rules that
   most often get a pull request rejected.
@@ -251,15 +251,15 @@ of truth.
 
 | Maintainer | Role | Contact |
 |---|---|---|
-| [airlock-sec](https://github.com/airlock-sec) owners | project owner, reviews protected paths | open an issue, or a private advisory per [`SECURITY.md`](SECURITY.md) |
+| [posture-sec](https://github.com/posture-sec) owners | project owner, reviews protected paths | open an issue, or a private advisory per [`SECURITY.md`](SECURITY.md) |
 
 A personal handle and a chat link go here once they are the ones the project will actually answer.
 Until then the issue tracker is the supported channel.
 
 Thanks to everyone who has contributed:
 
-<a href="https://github.com/airlock-sec/airlock/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=airlock-sec/airlock" alt="Airlock contributors" />
+<a href="https://github.com/posture-sec/airlock/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=posture-sec/airlock" alt="Airlock contributors" />
 </a>
 
 ## License

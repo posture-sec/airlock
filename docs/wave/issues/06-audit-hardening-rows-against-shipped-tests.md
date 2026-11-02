@@ -5,7 +5,7 @@ labels: Stellar Wave, complexity: trivial, area: tests, type: test
 roadmap: 7.3, 7.10, 7.11
 ---
 
-> **Repo context.** `airlock` is a Python 3.11 standard-library-only scanner: `src/airlock/` holds the pipeline (collector, then rules and detectors, then fingerprints and suppressions, then reporters) behind one CLI, and the rules themselves are data in `rules/builtin/*.toml`. The repository being scanned is untrusted input, so the hard rules in [`AGENTS.md`](https://github.com/airlock-sec/airlock/blob/main/AGENTS.md) section 4 are security properties rather than style. [`ROADMAP.md`](https://github.com/airlock-sec/airlock/blob/main/ROADMAP.md) is the source of truth for what is built and what is only a docstring.
+> **Repo context.** `airlock` is a Python 3.11 standard-library-only scanner: `src/airlock/` holds the pipeline (collector, then rules and detectors, then fingerprints and suppressions, then reporters) behind one CLI, and the rules themselves are data in `rules/builtin/*.toml`. The repository being scanned is untrusted input, so the hard rules in [`AGENTS.md`](https://github.com/posture-sec/airlock/blob/main/AGENTS.md) section 4 are security properties rather than style. [`ROADMAP.md`](https://github.com/posture-sec/airlock/blob/main/ROADMAP.md) is the source of truth for what is built and what is only a docstring.
 
 > 🟢 **Unblocked.** All three rows depend only on 2.2, 2.8 and 2.9, which merged and are green in CI. This is a reading-and-recording task with one small test-writing tail.
 
@@ -15,7 +15,7 @@ Phase 7 is written as the hardening pass that follows Phase 2, and for three row
 for appear to have already shipped:
 
 - **7.3, encoding tests.** Its "Done when" is UTF-16 with BOM, non-UTF-8 and CRLF.
-  [`tests/unit/test_collector.py`](https://github.com/airlock-sec/airlock/blob/main/tests/unit/test_collector.py)
+  [`tests/unit/test_collector.py`](https://github.com/posture-sec/airlock/blob/main/tests/unit/test_collector.py)
   already has `test_utf16_with_a_bom_does_not_trip_the_nul_rule`,
   `test_utf16_without_a_bom_is_still_reported`, `test_utf8_bom_is_stripped`,
   `test_undecodable_bytes_in_a_source_file_are_still_scanned` and
@@ -65,12 +65,12 @@ a defect the CRLF tests actually find.
 
 ## Tech stack
 
-- Runtime: Python 3.11, standard library only. [`AGENTS.md`](https://github.com/airlock-sec/airlock/blob/main/AGENTS.md) section 4 forbids adding a runtime dependency, and a scan never touches the network, so a helper library is not an option here.
-- Rows under audit: 7.3, 7.10 and 7.11 in [`ROADMAP.md`](https://github.com/airlock-sec/airlock/blob/main/ROADMAP.md).
-- Tests to read first: [`tests/unit/test_collector.py`](https://github.com/airlock-sec/airlock/blob/main/tests/unit/test_collector.py), [`tests/unit/test_suppression.py`](https://github.com/airlock-sec/airlock/blob/main/tests/unit/test_suppression.py), [`tests/unit/test_report.py`](https://github.com/airlock-sec/airlock/blob/main/tests/unit/test_report.py) and [`tests/unit/test_redos.py`](https://github.com/airlock-sec/airlock/blob/main/tests/unit/test_redos.py). The issue body names the specific cases that look like they already cover each row.
+- Runtime: Python 3.11, standard library only. [`AGENTS.md`](https://github.com/posture-sec/airlock/blob/main/AGENTS.md) section 4 forbids adding a runtime dependency, and a scan never touches the network, so a helper library is not an option here.
+- Rows under audit: 7.3, 7.10 and 7.11 in [`ROADMAP.md`](https://github.com/posture-sec/airlock/blob/main/ROADMAP.md).
+- Tests to read first: [`tests/unit/test_collector.py`](https://github.com/posture-sec/airlock/blob/main/tests/unit/test_collector.py), [`tests/unit/test_suppression.py`](https://github.com/posture-sec/airlock/blob/main/tests/unit/test_suppression.py), [`tests/unit/test_report.py`](https://github.com/posture-sec/airlock/blob/main/tests/unit/test_report.py) and [`tests/unit/test_redos.py`](https://github.com/posture-sec/airlock/blob/main/tests/unit/test_redos.py). The issue body names the specific cases that look like they already cover each row.
 - Deliverable is a verdict per row with the test name that proves it, and a new task only where the proof is missing. One gap is already known: CRLF handling at the collector.
 - Run before pushing: `python -m pytest tests/unit` and read the failure list rather than the pass count, because a row that looks covered may be covered by a test that asserts something adjacent.
 
 ### **Contact & Support**
-- [`SUPPORT.md`](https://github.com/airlock-sec/airlock/blob/main/SUPPORT.md) — where to ask, the commands CI runs, and the rules that most often get a pull request rejected
-- [`SECURITY.md`](https://github.com/airlock-sec/airlock/blob/main/SECURITY.md) — private disclosure only; never open an issue about a bypass
+- [`SUPPORT.md`](https://github.com/posture-sec/airlock/blob/main/SUPPORT.md) — where to ask, the commands CI runs, and the rules that most often get a pull request rejected
+- [`SECURITY.md`](https://github.com/posture-sec/airlock/blob/main/SECURITY.md) — private disclosure only; never open an issue about a bypass

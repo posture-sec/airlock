@@ -5,8 +5,10 @@ reading away rather than several.
 
 ## 1. The three facts that decide timing
 
-- **`airlock-sec/airlock` is not on the approved-repository list.** Checked 2026-10-28 against the
-  program's approved list (842 repositories at that reading), which does not include this one. The
+- **Neither this repository nor its predecessor is on the approved-repository list.** The check on
+  2026-10-28 ran against `airlock-sec/airlock` (842 repositories at that reading) and did not include
+  it; the program page read 838 approved repositories with no active or upcoming wave on 2026-11-02,
+  and `posture-sec/airlock` has never been submitted at its new path. The
   list is only readable from the Drips dashboard, so re-confirm it there immediately before
   submitting rather than trusting this line: an application that reads as a duplicate is worse than a
   late one.
@@ -17,7 +19,7 @@ reading away rather than several.
   unresolved issues roll over, so issues published now are still counted later.
 
 Decision **D-05** ("Pursue SCF or Drips Wave funding") is still `Open` in
-[`ROADMAP.md`](https://github.com/airlock-sec/airlock/blob/main/ROADMAP.md) section 7, and task 8.4
+[`ROADMAP.md`](https://github.com/posture-sec/airlock/blob/main/ROADMAP.md) section 7, and task 8.4
 owns it. This file prepares the Wave half of that choice; it does not make it.
 
 ## 2. What the form asks for, and what to write
@@ -60,11 +62,11 @@ scoped issues across four areas with a test-first contribution gate is the evide
 The standard submission asks for a live app URL, both repo URLs, on-chain verification links and a
 demo video. Airlock has no app, no contracts and no deployment, so the equivalents are:
 
-- Repository: `https://github.com/airlock-sec/airlock`
-- The bypass evidence: [`PRD.md`](https://github.com/airlock-sec/airlock/blob/main/PRD.md)
-  Appendix B, and [`scripts/bypass_probe.py`](https://github.com/airlock-sec/airlock/blob/main/scripts/bypass_probe.py)
-- The design: [`ARCHITECTURE_ESSENTIALS.md`](https://github.com/airlock-sec/airlock/blob/main/ARCHITECTURE_ESSENTIALS.md)
-  for the hard rules and [`ROADMAP.md`](https://github.com/airlock-sec/airlock/blob/main/ROADMAP.md)
+- Repository: `https://github.com/posture-sec/airlock`
+- The bypass evidence: [`PRD.md`](https://github.com/posture-sec/airlock/blob/main/PRD.md)
+  Appendix B, and [`scripts/bypass_probe.py`](https://github.com/posture-sec/airlock/blob/main/scripts/bypass_probe.py)
+- The design: [`ARCHITECTURE_ESSENTIALS.md`](https://github.com/posture-sec/airlock/blob/main/ARCHITECTURE_ESSENTIALS.md)
+  for the hard rules and [`ROADMAP.md`](https://github.com/posture-sec/airlock/blob/main/ROADMAP.md)
   for what exists versus what is planned
 - A green CI run on `main`, citable by run id
 
@@ -97,10 +99,10 @@ Airlock (HIGH, exit 1) is the whole argument in ninety seconds, it can be produc
 ## 3. Points against the caps
 
 The batch totals **2,150 pre-multiplier points**: 5 Trivial at 100, 7 Medium at 150, 3 High at 200.
-The caps observed in a previous Wave were 25,000 per repository and 75,000 per organization, and
-`airlock-sec` would have exactly one repository in the program, so the batch is roughly 9% of the
-per-repo ceiling. Confirm the actual numbers on the dashboard before publishing rather than planning
-against that reading.
+The caps observed in a previous Wave were 25,000 per repository and 75,000 per organization, so this
+batch is roughly 9% of the per-repo ceiling. `posture-sec` now hosts a second program repository,
+`guage`, whose own backlog would draw on the same per-org pool, so the org-side arithmetic has to be
+read from the dashboard with both repositories in view rather than planned against this number.
 
 The headroom is deliberate. The remaining open roadmap rows that would make good issues (the corpus,
 the parity harness, the Stellar detectors, the false-positive review) are either blocked on 0.10 or
@@ -109,7 +111,7 @@ program's own guidance warns about.
 
 ## 4. Before the form goes in
 
-- [ ] Re-confirm on the dashboard that `airlock-sec/airlock` is not already approved, and that it has
+- [ ] Re-confirm on the dashboard that `posture-sec/airlock` is not already approved, and that it has
       not been applied for before. A second application for one repository reads as spam.
 - [ ] Record the real per-repo and per-org caps for the coming Wave.
 - [ ] Apply the `Stellar Wave` label and the complexity and area labels

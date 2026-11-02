@@ -12,7 +12,7 @@
 # `gh issue edit` immediately afterwards.
 #
 # Usage:
-#   sh scripts/create_wave_issues.sh                 # dry run against airlock-sec/airlock
+#   sh scripts/create_wave_issues.sh                 # dry run against posture-sec/airlock
 #   sh scripts/create_wave_issues.sh --apply [--repo owner/name]
 #
 # AGENTS.md section 4: no network during a scan. This is not a scan; it is a maintenance script and
@@ -20,7 +20,7 @@
 
 set -eu
 
-repo="airlock-sec/airlock"
+repo="posture-sec/airlock"
 apply=0
 dir="docs/wave/issues"
 

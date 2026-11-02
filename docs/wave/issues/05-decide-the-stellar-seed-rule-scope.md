@@ -5,7 +5,7 @@ labels: Stellar Wave, complexity: trivial, area: detectors, documentation
 roadmap: 0.7
 ---
 
-> **Repo context.** `airlock` is a Python 3.11 standard-library-only scanner: `src/airlock/` holds the pipeline (collector, then rules and detectors, then fingerprints and suppressions, then reporters) behind one CLI, and the rules themselves are data in `rules/builtin/*.toml`. The repository being scanned is untrusted input, so the hard rules in [`AGENTS.md`](https://github.com/airlock-sec/airlock/blob/main/AGENTS.md) section 4 are security properties rather than style. [`ROADMAP.md`](https://github.com/airlock-sec/airlock/blob/main/ROADMAP.md) is the source of truth for what is built and what is only a docstring.
+> **Repo context.** `airlock` is a Python 3.11 standard-library-only scanner: `src/airlock/` holds the pipeline (collector, then rules and detectors, then fingerprints and suppressions, then reporters) behind one CLI, and the rules themselves are data in `rules/builtin/*.toml`. The repository being scanned is untrusted input, so the hard rules in [`AGENTS.md`](https://github.com/posture-sec/airlock/blob/main/AGENTS.md) section 4 are security properties rather than style. [`ROADMAP.md`](https://github.com/posture-sec/airlock/blob/main/ROADMAP.md) is the source of truth for what is built and what is only a docstring.
 
 > **Decision recorded locally, 2026-10-28 UTC: KEEP, approved by the owner.** Retain the offline checksum-valid plaintext tracked-file detector. Task 0.7 is complete; implementation remains 6.2 (`strkey.py`) and 6.3 (the detector). This corrects the repository draft only; it does not update or close the already-published issue #24.
 
@@ -59,12 +59,12 @@ funding, live use and testnet use cannot be inferred from the encoding.
 
 ## Tech stack
 
-- Runtime: Python 3.11, standard library only. [`AGENTS.md`](https://github.com/airlock-sec/airlock/blob/main/AGENTS.md) section 4 forbids adding a runtime dependency, and a scan never touches the network, so a helper library is not an option here.
-- Code today: [`src/airlock/detectors/stellar_seed.py`](https://github.com/airlock-sec/airlock/blob/main/src/airlock/detectors/stellar_seed.py) and [`src/airlock/strkey.py`](https://github.com/airlock-sec/airlock/blob/main/src/airlock/strkey.py) are stubs of a few lines each, registered as neither `DETECTORS` nor `DETECTOR_NAMES` in [`src/airlock/detectors/__init__.py`](https://github.com/airlock-sec/airlock/blob/main/src/airlock/detectors/__init__.py).
-- Design text: [`ARCHITECTURE.md`](https://github.com/airlock-sec/airlock/blob/main/ARCHITECTURE.md) 9.4, now source-cited at pinned revisions, and the owner-approved KEEP decision D-06 in [`ROADMAP.md`](https://github.com/airlock-sec/airlock/blob/main/ROADMAP.md).
+- Runtime: Python 3.11, standard library only. [`AGENTS.md`](https://github.com/posture-sec/airlock/blob/main/AGENTS.md) section 4 forbids adding a runtime dependency, and a scan never touches the network, so a helper library is not an option here.
+- Code today: [`src/airlock/detectors/stellar_seed.py`](https://github.com/posture-sec/airlock/blob/main/src/airlock/detectors/stellar_seed.py) and [`src/airlock/strkey.py`](https://github.com/posture-sec/airlock/blob/main/src/airlock/strkey.py) are stubs of a few lines each, registered as neither `DETECTORS` nor `DETECTOR_NAMES` in [`src/airlock/detectors/__init__.py`](https://github.com/posture-sec/airlock/blob/main/src/airlock/detectors/__init__.py).
+- Design text: [`ARCHITECTURE.md`](https://github.com/posture-sec/airlock/blob/main/ARCHITECTURE.md) 9.4, now source-cited at pinned revisions, and the owner-approved KEEP decision D-06 in [`ROADMAP.md`](https://github.com/posture-sec/airlock/blob/main/ROADMAP.md).
 - Recorded outcome: retain the planned rule, not a general secret scanner. Do not implement or delete either stub in this docs-only task.
-- Do not commit a live-looking seed while testing the tools you compare. Build any probe key from fragments, per [`AGENTS.md`](https://github.com/airlock-sec/airlock/blob/main/AGENTS.md) section 4.
+- Do not commit a live-looking seed while testing the tools you compare. Build any probe key from fragments, per [`AGENTS.md`](https://github.com/posture-sec/airlock/blob/main/AGENTS.md) section 4.
 
 ### **Contact & Support**
-- [`SUPPORT.md`](https://github.com/airlock-sec/airlock/blob/main/SUPPORT.md) — where to ask, the commands CI runs, and the rules that most often get a pull request rejected
-- [`SECURITY.md`](https://github.com/airlock-sec/airlock/blob/main/SECURITY.md) — private disclosure only; never open an issue about a bypass
+- [`SUPPORT.md`](https://github.com/posture-sec/airlock/blob/main/SUPPORT.md) — where to ask, the commands CI runs, and the rules that most often get a pull request rejected
+- [`SECURITY.md`](https://github.com/posture-sec/airlock/blob/main/SECURITY.md) — private disclosure only; never open an issue about a bypass
