@@ -12,7 +12,7 @@ command is written so the owner can run it, or approve an agent running it, one 
 | Ruleset | `protect main`, id 26360459, enforcement active, requiring the `checks` and `roadmap` contexts from integration 15368, strict, merge and squash allowed, and holding only `deletion`, `non_fast_forward`, `pull_request` and `required_status_checks` (see the note below) |
 | Pages | `build_type: workflow`; run 3 of `pages.yml` deployed `main`, and `https://posture-sec.github.io/airlock/` answers 200 with the new URLs on every page and in `sitemap.xml` (run 1 failed, before Pages was enabled) |
 | Release | `v0.0.1` as a pre-release on `main`, with notes that name the unbuilt Action, Stellar detectors and SARIF |
-| CODEOWNERS | twelve rules, every one naming `@Gabbydunkk`, the suspended account: `GET /repos/posture-sec/airlock/codeowners/errors` reports twelve "Unknown owner" entries. Re-pointed at `@bolabeatz`, the only member of `posture-sec`, with a thirteenth rule `/.github/` so all seven path groups task 1.3 lists are covered |
+| CODEOWNERS | twelve rules, every one naming `@Gabbydunkk`, the suspended account: `GET /repos/posture-sec/airlock/codeowners/errors` reports twelve "Unknown owner" entries. Re-pointed at `@bolabeatz`, the only member of `posture-sec`, with a thirteenth rule `/.github/` so all seven path groups task 1.3 lists are covered; the same endpoint read on that branch returns no errors |
 | Direct push to `main` | refused, observed: `GH013` with "Changes must be made through a pull request", `main` read back unmoved. The third note below has the exact call and answer |
 
 Four readings that the plan did not predict:
