@@ -9,7 +9,7 @@ command is written so the owner can run it, or approve an agent running it, one 
 |---|---|
 | Topics | the twelve listed, set as a full replacement |
 | Labels | `Stellar Wave`, three `complexity: *`, seven `area: *`, `type: test`, `blocked`, plus the stock set: 23 in total |
-| Ruleset | `protect main`, id 26360459, enforcement active, requiring the `checks` and `roadmap` contexts from integration 15368, strict, merge and squash allowed |
+| Ruleset | `protect main`, id 26360459, enforcement active, requiring the `checks` and `roadmap` contexts from integration 15368, strict, merge and squash allowed, and holding only `deletion`, `non_fast_forward`, `pull_request` and `required_status_checks` (see the note below) |
 | Pages | `build_type: workflow`; run 3 of `pages.yml` deployed `main`, and `https://posture-sec.github.io/airlock/` answers 200 with the new URLs on every page and in `sitemap.xml` (run 1 failed, before Pages was enabled) |
 | Release | `v0.0.1` as a pre-release on `main`, with notes that name the unbuilt Action, Stellar detectors and SARIF |
 
@@ -24,10 +24,16 @@ Two readings that the plan did not predict:
   `pull_request` rule takes `required_approving_review_count`, not `required_approver_count`, and a
   count of 1 on a one-maintainer repository blocks every pull request, because GitHub does not let an
   author approve their own. The applied ruleset therefore sets it to 0 and turns
-  `require_code_owner_review` off, the same shape `posture-sec/guage` runs, and keeps thread
-  resolution, strict status checks and the four ref rules. `guage` records the same acceptance under
-  its D-14. The required checks are the real enforcement here, and pull request #1 of this repository
-  is the run that shows the `checks` and `roadmap` contexts arriving.
+  `require_code_owner_review` off and keeps thread resolution and strict status checks. `guage`
+  records the same acceptance under its D-14.
+- **An `update` rule blocks the merge it is meant to guard.** With `creation` and `update` in the
+  ruleset and no bypass actor, merging a pull request is an update of a protected ref:
+  `PUT /pulls/2/merge` answered 405, "Repository rule violations found: Cannot update this protected
+  ref", while both required contexts were green. The applied ruleset therefore keeps only `deletion`,
+  `non_fast_forward`, `pull_request` and `required_status_checks`, which is the exact shape
+  `posture-sec/guage` runs, and pull request #2 merged under it. Direct pushes to `main` are still
+  refused: the rule that refuses them is `pull_request`, not `update`, which is the point task 1.3
+  observes.
 
 Verified against the live repository on 2026-10-28 with read-only calls. That reading was taken at
 `airlock-sec/airlock`, the repository before the 2026-11-02 move (task 1.15), so it describes the
