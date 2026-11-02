@@ -3,25 +3,26 @@
 # (project_structure.md 2). Later rules win over earlier ones.
 
 # The roadmap gate itself
-/scripts/ @Gabbydunkk
+/scripts/ @bolabeatz
 
 # Detection logic and the rules that feed it
-/rules/ @Gabbydunkk
-/src/airlock/detectors/ @Gabbydunkk
+/rules/ @bolabeatz
+/src/airlock/detectors/ @bolabeatz
 
 # Trust model and fail-closed behavior
-/src/airlock/policy.py @Gabbydunkk
-/src/airlock/collector.py @Gabbydunkk
-/src/airlock/runner.py @Gabbydunkk
+/src/airlock/policy.py @bolabeatz
+/src/airlock/collector.py @bolabeatz
+/src/airlock/runner.py @bolabeatz
 
 # Dogfood policy and the Wasm manifest
-/airlock.toml @Gabbydunkk
-/wasm-manifest.toml @Gabbydunkk
+/airlock.toml @bolabeatz
+/wasm-manifest.toml @bolabeatz
 
 # The supply chain of the tool itself
-/action.yml @Gabbydunkk
-/.github/workflows/ @Gabbydunkk
-/pyproject.toml @Gabbydunkk
+/action.yml @bolabeatz
+/.github/ @bolabeatz
+/.github/workflows/ @bolabeatz
+/pyproject.toml @bolabeatz
 
 # Review enforcement
-/.github/CODEOWNERS @Gabbydunkk
+/.github/CODEOWNERS @bolabeatz

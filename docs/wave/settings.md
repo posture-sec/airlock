@@ -12,8 +12,10 @@ command is written so the owner can run it, or approve an agent running it, one 
 | Ruleset | `protect main`, id 26360459, enforcement active, requiring the `checks` and `roadmap` contexts from integration 15368, strict, merge and squash allowed, and holding only `deletion`, `non_fast_forward`, `pull_request` and `required_status_checks` (see the note below) |
 | Pages | `build_type: workflow`; run 3 of `pages.yml` deployed `main`, and `https://posture-sec.github.io/airlock/` answers 200 with the new URLs on every page and in `sitemap.xml` (run 1 failed, before Pages was enabled) |
 | Release | `v0.0.1` as a pre-release on `main`, with notes that name the unbuilt Action, Stellar detectors and SARIF |
+| CODEOWNERS | twelve rules, every one naming `@Gabbydunkk`, the suspended account: `GET /repos/posture-sec/airlock/codeowners/errors` reports twelve "Unknown owner" entries. Re-pointed at `@bolabeatz`, the only member of `posture-sec`, with a thirteenth rule `/.github/` so all seven path groups task 1.3 lists are covered; the same endpoint read on that branch returns no errors |
+| Direct push to `main` | refused, observed: `GH013` with "Changes must be made through a pull request", `main` read back unmoved. The third note below has the exact call and answer |
 
-Two readings that the plan did not predict:
+Four readings that the plan did not predict:
 
 - **On the free plan, a private repository can have neither a ruleset nor Pages.** `POST /repos/.../rulesets`
   answers 403, "Upgrade to GitHub Pro or make this repository public to enable this feature", and
@@ -31,9 +33,22 @@ Two readings that the plan did not predict:
   `PUT /pulls/2/merge` answered 405, "Repository rule violations found: Cannot update this protected
   ref", while both required contexts were green. The applied ruleset therefore keeps only `deletion`,
   `non_fast_forward`, `pull_request` and `required_status_checks`, which is the exact shape
-  `posture-sec/guage` runs, and pull request #2 merged under it. Direct pushes to `main` are still
-  refused: the rule that refuses them is `pull_request`, not `update`, which is the point task 1.3
-  observes.
+  `posture-sec/guage` runs, and pull request #2 merged under it. That leaves `pull_request` as the
+  rule that refuses a direct push, and task 1.3's Done-when was then tested rather than reasoned
+  about: an empty commit built with `git commit-tree`, pushed with
+  `git push <remote> <sha>:refs/heads/main`, came back `GH013: Repository rule violations found for
+  refs/heads/main` with "Changes must be made through a pull request" and "2 of 2 required status
+  checks are expected", and `git ls-remote` read `main` still at its previous commit.
+- **A suspended owner invalidates every CODEOWNERS rule that names them, quietly.** All twelve rules
+  in `.github/CODEOWNERS` named `@Gabbydunkk`, and that account is now a 404 as a user, so the file
+  asserting "owner review is required before anything merges in these paths" pointed at nobody. The
+  only surface that says so is `GET /repos/posture-sec/airlock/codeowners/errors`, which reported
+  twelve "Unknown owner" entries; nothing in the pull request UI or the ruleset complains. Every rule
+  now names `@bolabeatz`, the sole member of `posture-sec`, and `/.github/` was added so the seven
+  path groups task 1.3 lists are all covered. `require_code_owner_review` stays `false`, which is the
+  honest pairing: an enforced code-owner review against a file that resolved to nobody would have
+  blocked the only account able to merge, and with one maintainer there is no separate reviewer to
+  require anyway.
 
 Verified against the live repository on 2026-10-28 with read-only calls. That reading was taken at
 `airlock-sec/airlock`, the repository before the 2026-11-02 move (task 1.15), so it describes the
@@ -186,20 +201,27 @@ Three notes on choices in that document:
   added, that list is a security boundary and belongs in the same pull request as the change, not in a
   settings edit nobody reviewed. Task 1.2 (account hardening) is the precondition for trusting it.
 
-This closes the file-editable half of task 1.3. `.github/CODEOWNERS` already exists and lists the
-protected paths, which is why `require_code_owner_review` is `true` above: the file has no effect
-until a ruleset asks for it, so turning it on is what makes the twelve entries mean something. With
-one owner it changes nothing in practice today, and it changes everything the moment a second
-account joins, which is the point of configuring it now rather than remembering later. Task 1.2
-(account hardening) and 0.16 (what the org plan actually allows) stay open, and 0.16 is the reason
-to check whether `authorized_actor_names` and the bypass list are the right shape before trusting
-this file.
+This closes task 1.3, and what closes it is the observed refusal in the third note above, not the
+existence of a ruleset. Two deviations from the sketch are deliberate and both are recorded in the
+notes at the top of this file: `required_approver_count: 1` became the correctly spelled
+`required_approving_review_count: 0`, because GitHub will not let the sole author approve their own
+pull request, and `require_code_owner_review` is `false` even though the sketch says `true`, because
+`.github/CODEOWNERS` resolved to twelve entries naming the suspended account. Enforcing it would have
+required review from nobody, and with one maintainer there is no second reviewer to require in any
+case. The file is a record of who must review a protected path until a second account joins, which is
+when turning the rule on costs nothing. The sketch's own actor list is now `["bolabeatz"]`, the only
+member of `posture-sec`; it named the suspended account until the move, and an actor list pointing at
+a 404 is not a security boundary. The applied ruleset carries no allow-list beyond `bypass_actors: []`,
+which is what let the push-probe get refused instead of bypassed. Task 1.2 (account hardening) and
+0.16 (what the org plan actually allows) stay open, and 1.2 is the precondition for trusting either
+name.
 
 ## 5. A release tag
 
 The guide asks for a version tag. `ROADMAP.md` 5.5 gates `v0.1.0` behind Phases 0 to 5 and a review
-of gates G1 to G10, and the repository is at 36% of that, so cutting `v0.1.0` today would be a claim
-this file contradicts two sections later.
+of gates G1 to G10. As of 2026-11-02 the two phases that gate it are nowhere near complete: 40 of the
+71 tasks in Phases 0 to 5 are done, and the progress table's own gates row reads 0 of 10. Cutting
+`v0.1.0` today would therefore be a claim this file contradicts two sections later.
 
 `pyproject.toml` and `airlock.__version__` both already read `0.0.1`, so the honest tag is `v0.0.1`
 as a pre-release, described as what it is:
