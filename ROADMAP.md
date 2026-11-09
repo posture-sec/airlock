@@ -1,6 +1,6 @@
 # ROADMAP: Airlock
 
-Last updated: 2026-11-09 13:29 UTC
+Last updated: 2026-11-09 14:06 UTC
 
 Roadmap version: 1
 
@@ -325,6 +325,7 @@ Newest first. One row per merged change.
 
 | Date (UTC) | Change | Tasks |
 |---|---|---|
+| 2026-11-09 14:06 | Implemented dynamic README metrics synchronization (`scripts/sync_readme.py`) generating live Shields.io endpoint JSON files under `site/data/` for tests (709 passing) and rules (22 verified), and enforced with `--check` in the `roadmap-check` workflow. | none ticked |
 | 2026-11-09 13:29 | Install OpenSSF Scorecard workflow (.github/workflows/scorecard.yml), add OpenSSF Scorecard badge, Roadmap check badge, and Live Docs badge to README. | 1.7 |
 | 2026-11-02 11:25 | Close 1.3 on the push it exists to refuse, and fix the one file the suspension broke. The Done-when was tested directly: an empty commit built with `git commit-tree` (no working-tree change, no branch switch) was pushed at `refs/heads/main` over HTTPS, GitHub answered `GH013: Repository rule violations found for refs/heads/main` with "Changes must be made through a pull request" and "2 of 2 required status checks are expected", and `git ls-remote` read `main` back at `5598648` with the branch not moved. That is the first version of this claim in this repository backed by an observed refusal instead of an assertion. `.github/CODEOWNERS` turned out to be dead on arrival here: all twelve of its rules named `@Gabbydunkk`, whose account the suspension removed, and `GET /repos/posture-sec/airlock/codeowners/errors` reported twelve "Unknown owner" entries rather than resolving any of them. Every rule now names `@bolabeatz`, the only member of `posture-sec`, and `/.github/` was added so the file covers all seven path groups 1.3 lists instead of two subpaths of it. `require_code_owner_review` stays `false`, because with one maintainer an enforced code-owner review would block the only account that can merge; the file records who must review and becomes a gate when a second reviewer joins. 1.7 is unblocked by this, its only dependency. Two bookkeeping corrections while the file was open: the rows for 11:08 and 11:14 carried clock times about ten and twenty minutes ahead of the commits they describe, and are re-timed to `git log --format=%cI` of `c204c0a` and `5598648`; `Last updated` moves with them and every time from here on is read from `date -u` at the moment of writing rather than estimated. Verified: `date -u`, `git log --format=%cI`, `gh api repos/posture-sec/airlock/rulesets/26360459` read back for the rule set, bypass actors and required contexts, the codeowners error endpoint before and after, the push refusal and the unchanged `main`. After: the
 same endpoint read with `?ref=chore/1.3-close-codeowners` returns `{"errors": []}`, so the thirteen
