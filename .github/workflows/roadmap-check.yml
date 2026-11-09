@@ -32,3 +32,6 @@ jobs:
 
       - name: The progress table matches the task lines
         run: python scripts/roadmap_progress.py --check
+
+      - name: README metrics and badge endpoints are synchronized
+        run: python scripts/sync_readme.py --check
