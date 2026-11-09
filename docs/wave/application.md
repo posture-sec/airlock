@@ -14,13 +14,14 @@ reading away rather than several.
   late one.
 - **A rejected repository cannot re-apply.** The route after a rejection is an appeal through the
   dashboard. That single rule is why this draft states what is not built.
-- **Wave 10 ran 15 to 22 October 2026 and has closed.** The next submission is for the following
-  cycle, which is also the cycle these fifteen issues would be live for. Budgets reset per Wave, and
-  unresolved issues roll over, so issues published now are still counted later.
+- **Wave 11 is upcoming (2026-11-18T14:00:35Z to 2026-11-25T14:00:55Z, $75,000 USD budget).** This
+  application targets the Wave 11 cycle. The fifteen scoped issues prepared in `docs/wave/issues/` are
+  sized and staged for this window. Budgets reset per Wave, and unresolved issues roll over, so issues
+  published once approved are counted for Wave 11.
 
-Decision **D-05** ("Pursue SCF or Drips Wave funding") is still `Open` in
-[`ROADMAP.md`](https://github.com/posture-sec/airlock/blob/main/ROADMAP.md) section 7, and task 8.4
-owns it. This file prepares the Wave half of that choice; it does not make it.
+Decision **D-05** ("Pursue SCF or Drips Wave funding") is **Accepted** as of 2026-11-09 in
+[`ROADMAP.md`](https://github.com/posture-sec/airlock/blob/main/ROADMAP.md) section 7: apply to
+Drips Wave for Wave 11, with this submission packet and the 15 scoped issues in `docs/wave/issues/`.
 
 ## 2. What the form asks for, and what to write
 
@@ -45,7 +46,7 @@ Say this plainly rather than letting a reviewer find it.
 
 | Claim | Status |
 |---|---|
-| The scanner runs: 22 rules, 3 code detectors plus the pattern engine, three output formats plus a step summary, 664 tests, CI green on every pull request, and it scans this repository on every build | Built, and the CI runs are public |
+| The scanner runs: 22 rules, 3 code detectors plus the pattern engine, three output formats plus a step summary, 709 tests passed (1 skipped), CI green on every pull request, and it scans this repository on every build | Built, and the CI runs are public |
 | The seven bypasses are confirmed against the real script, with a reproducible harness | Done 2026-10-27; `scripts/bypass_probe.py` reproduces it |
 | Five of the seven fail closed under Airlock today, measured | Now six. Cases 1 to 5 were measured on the `cfg-*` and `wasm-*` rules, and case 7 (a decode-and-eval payload under `vendor/`) was measured on 2026-10-30 against `python -m airlock scan --mode full` in a scratch repository: `1 HIGH · exit 1` from `pat-decode-eval`, which task 3.6's text-side slice added. Only case 6, a `.cargo/config.toml` shell `runner`, stays invisible until `cargo_vectors` (6.4). No bypass harness locks these in yet; that is task 3.9, issue 14 |
 | A repository can install it as a GitHub Action | Not built. `action.yml` is task 4.1, issue 15 |
@@ -63,6 +64,7 @@ The standard submission asks for a live app URL, both repo URLs, on-chain verifi
 demo video. Airlock has no app, no contracts and no deployment, so the equivalents are:
 
 - Repository: `https://github.com/posture-sec/airlock`
+- Documentation site: `https://posture-sec.github.io/airlock/` (live and automated via GitHub Pages)
 - The bypass evidence: [`PRD.md`](https://github.com/posture-sec/airlock/blob/main/PRD.md)
   Appendix B, and [`scripts/bypass_probe.py`](https://github.com/posture-sec/airlock/blob/main/scripts/bypass_probe.py)
 - The design: [`ARCHITECTURE_ESSENTIALS.md`](https://github.com/posture-sec/airlock/blob/main/ARCHITECTURE_ESSENTIALS.md)
@@ -114,11 +116,10 @@ program's own guidance warns about.
 - [ ] Re-confirm on the dashboard that `posture-sec/airlock` is not already approved, and that it has
       not been applied for before. A second application for one repository reads as spam.
 - [ ] Record the real per-repo and per-org caps for the coming Wave.
-- [ ] Apply the `Stellar Wave` label and the complexity and area labels
+- [x] Apply the `Stellar Wave` label and the complexity and area labels
       (`docs/wave/settings.md` section 3), so the issues exist as GitHub issues the moment approval
-      lands.
+      lands. (Applied 2026-11-02: 23 labels configured on `posture-sec/airlock`).
 - [ ] Produce the two-scan demo recording and host it somewhere the form can link.
-- [ ] Decide D-05. If the answer is SCF rather than Wave, this file is still useful: the same
-      fifteen issues and the same honest status table are what an SCF application asks for.
-- [ ] Have the owner, not an agent, submit it. The form asks questions about account ownership and
-      payout that an agent should not answer on someone's behalf.
+- [x] Decide D-05. (Accepted 2026-11-09: apply to Wave 11 with the 15 scoped issues in `docs/wave/issues/`).
+- [ ] Have the owner, not an agent, submit it via https://www.drips.network/maintainers. The form asks
+      questions about account ownership and payout that an agent should not answer on someone's behalf.

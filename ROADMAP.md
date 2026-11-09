@@ -1,6 +1,6 @@
 # ROADMAP: Airlock
 
-Last updated: 2026-11-09 14:06 UTC
+Last updated: 2026-11-09 14:36 UTC
 
 Roadmap version: 1
 
@@ -42,9 +42,9 @@ The repository is 100% ready when every task in Phases 0 to 8 is done and every 
 | 5 | Release v0.1.0 | 1 | 7 | 14% |
 | 6 | Stellar detectors | 0 | 5 | 0% |
 | 7 | Hardening and edge cases | 4 | 13 | 31% |
-| 8 | Release v0.2.0 and community | 1 | 6 | 17% |
+| 8 | Release v0.2.0 and community | 2 | 6 | 33% |
 | 9 (backlog) | Backlog | 0 | 10 | 0% |
-| **Phases 0 to 8** | **Readiness total** | **45** | **95** | **47%** |
+| **Phases 0 to 8** | **Readiness total** | **46** | **95** | **48%** |
 | Gates | G1 to G10 | 0 | 10 | 0% |
 <!-- PROGRESS:END -->
 
@@ -267,7 +267,7 @@ families.
 - [ ] **8.1** Update every doc for v0.2 behavior (`PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md`, `project_structure.md`, `README.md`, `AGENTS.md`, `CLAUDE.md`). M. Deps: Phases 6 and 7. Gate G7.
 - [ ] **8.2** Tag `v0.2.0` with attestation. S. Deps: 8.1.
 - [ ] **8.3** Review false-positive reports from the first external users and adjust rules. M. Deps: 8.2.
-- [ ] **8.4** Decide D-05: submit to SCF or Drips Wave, and prepare the application with adoption evidence. M. Deps: 8.2.
+- [x] **8.4** Decide D-05: submit to SCF or Drips Wave, and prepare the application with adoption evidence. M. Deps: 8.2. Done when: D-05 is decided (Accepted 2026-11-09 for Wave 11), application packet in docs/wave/application.md and settings in docs/wave/settings.md are finalized with 709 tests, 22 rules, live documentation site link, and 15 scoped issues ready in docs/wave/issues/.
 - [ ] **8.5** Outreach to Stellar maintainers (post, docs, demo). S. Deps: 8.2.
 - [x] **8.6** Documentation site on GitHub Pages: overview, usage, rule reference and trust model. S. Deps: 3.6. Done when: `.github/workflows/pages.yml` deploys `site/` to `https://posture-sec.github.io/airlock/` (this clause read `airlock-sec.github.io` until the 2026-11-02 move, so 8.6 is re-verified against the new URL by task 1.15), the published rule reference names every shipped rule, and `python scripts/build_site.py --check` fails a stale page. (started 2026-10-30 11:46: `site/` holds four pages, one stylesheet and one dependency-free script, and the rule reference plus the hero counts are generated from `rules/builtin/*.toml` into marked blocks so the page cannot describe a rule set that no longer ships. `tests/unit/test_site.py` checks links, page chrome, the CSP, the closed palette, the absence of gradients, rounded corners and shadows, the sitemap and the workflow pins; `tests/unit/test_build_site.py` checks the generator and its refusals. Done 2026-10-30: Pages was enabled with `build_type: workflow` and the first deployment, run [41052150613](https://github.com/airlock-sec/airlock/actions/runs/41052150613), published from `main` at `242f9df` in 43 s. Every published file was fetched and compared byte for byte with the committed copy (index, usage, rules, trust, the stylesheet, the script, `data/rules.json`, the sitemap, robots and the favicon), all ten matched, and `rules.html` carries every one of the 22 shipped rules plus the four family controls.)
 
@@ -298,7 +298,7 @@ Parallelizable early: 0.6 to 0.14, 1.2, 1.6, 1.8, 1.10. The roadmap gate (1.9) s
 | D-02 | License | Decided 2026-10-27 | Apache-2.0; the `LICENSE` file is already in the repository [Verified: repository page] |
 | D-03 | Host account | Decided 2026-10-27, amended 2026-11-02 | `airlock-sec/airlock`; `airlock-sec` is a GitHub organization (confirmed by the owner; an earlier reading of the repository page suggested a user account, which was wrong). The org plan decides which controls exist (task 0.16). A new repo likely needs its own Drips Wave application [Unverified]. Amended 2026-11-02: the host is `posture-sec/airlock`, because the account that owned `airlock-sec` was suspended and the organization went with it; `posture-sec` is also the host of `guage`, so the two repositories share one owner list, one billing plan and one Drips Wave application path (task 1.15) |
 | D-04 | Build the external watcher (task 9.1)? | Open | Decide after 0.13 and after dogfooding; it is the only design that survives a stolen credential [Likely] |
-| D-05 | Pursue SCF or Drips Wave funding | Open | Needs adoption evidence first. The Wave half is drafted as of 2026-10-28 (`docs/wave/application.md`, with the issue batch in `docs/wave/issues/` and the settings in `docs/wave/settings.md`); the draft states plainly that there is no adoption evidence, no release and no Action yet, which is the reason the decision stays open rather than being closed by paperwork. A rejected program application cannot be re-submitted, so this waits for the owner, not for more documents |
+| D-05 | Pursue SCF or Drips Wave funding | Accepted | Accepted 2026-11-09. Decision: submit posture-sec/airlock to Drips Wave 11 (window 2026-11-18 to 2026-11-25). Application packet in docs/wave/application.md and 15 scoped issues in docs/wave/issues/ staged and ready to publish via scripts/create_wave_issues.sh --apply upon repo approval |
 | D-06 | Keep, narrow or drop `stellar_seed` | Decided 2026-10-28 15:20 UTC | **KEEP**, explicitly approved by the owner: retain offline checksum-valid plaintext tracked-file detection, suppressible with a reason. Pinned Gitleaks/TruffleHog sources show no dedicated Stellar checksum detector; generic Gitleaks matches may overlap incidentally. Source inspection only, not executed-tool coverage (`ARCHITECTURE.md` 9.4). Valid test vectors also pass; funding or live use is not inferable. 0.7 closes the decision; implementation remains 6.2/6.3. |
 | D-07 | Roadmap gate has no exemptions, including dependency bumps | Decided 2026-10-27 | Matches the owner's instruction; Dependabot is grouped weekly to limit noise |
 | D-08 | Cut jsmask, SARIF-in-v0.1, `init`, `rules test` CLI, `deploy_gate`, SEP-58 parser from v0.1 | Decided 2026-10-27 | `ARCHITECTURE.md` 16.4 |
@@ -325,6 +325,7 @@ Newest first. One row per merged change.
 
 | Date (UTC) | Change | Tasks |
 |---|---|---|
+| 2026-11-09 14:36 | Finalize Wave 11 readiness packet: decide D-05 (Accepted), update application packet in docs/wave/application.md with Wave 11 window (Nov 18–25), 709 passed tests, and live docs site link. Verified 15 scoped issues staged in docs/wave/issues/ and 23 labels on GitHub. | 8.4, D-05 |
 | 2026-11-09 14:06 | Implemented dynamic README metrics synchronization (`scripts/sync_readme.py`) generating live Shields.io endpoint JSON files under `site/data/` for tests (709 passing) and rules (22 verified), and enforced with `--check` in the `roadmap-check` workflow. | none ticked |
 | 2026-11-09 13:29 | Install OpenSSF Scorecard workflow (.github/workflows/scorecard.yml), add OpenSSF Scorecard badge, Roadmap check badge, and Live Docs badge to README. | 1.7 |
 | 2026-11-02 11:25 | Close 1.3 on the push it exists to refuse, and fix the one file the suspension broke. The Done-when was tested directly: an empty commit built with `git commit-tree` (no working-tree change, no branch switch) was pushed at `refs/heads/main` over HTTPS, GitHub answered `GH013: Repository rule violations found for refs/heads/main` with "Changes must be made through a pull request" and "2 of 2 required status checks are expected", and `git ls-remote` read `main` back at `5598648` with the branch not moved. That is the first version of this claim in this repository backed by an observed refusal instead of an assertion. `.github/CODEOWNERS` turned out to be dead on arrival here: all twelve of its rules named `@Gabbydunkk`, whose account the suspension removed, and `GET /repos/posture-sec/airlock/codeowners/errors` reported twelve "Unknown owner" entries rather than resolving any of them. Every rule now names `@bolabeatz`, the only member of `posture-sec`, and `/.github/` was added so the file covers all seven path groups 1.3 lists instead of two subpaths of it. `require_code_owner_review` stays `false`, because with one maintainer an enforced code-owner review would block the only account that can merge; the file records who must review and becomes a gate when a second reviewer joins. 1.7 is unblocked by this, its only dependency. Two bookkeeping corrections while the file was open: the rows for 11:08 and 11:14 carried clock times about ten and twenty minutes ahead of the commits they describe, and are re-timed to `git log --format=%cI` of `c204c0a` and `5598648`; `Last updated` moves with them and every time from here on is read from `date -u` at the moment of writing rather than estimated. Verified: `date -u`, `git log --format=%cI`, `gh api repos/posture-sec/airlock/rulesets/26360459` read back for the rule set, bypass actors and required contexts, the codeowners error endpoint before and after, the push refusal and the unchanged `main`. After: the
