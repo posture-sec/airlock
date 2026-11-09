@@ -101,15 +101,11 @@ def sync(*, check: bool = False) -> bool:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
     badges = {
-        DATA_DIR / "badge-tests.json": build_badge_json(
-            "tests", f"{test_count} passed", "06b6d4"
-        ),
+        DATA_DIR / "badge-tests.json": build_badge_json("tests", f"{test_count} passed", "06b6d4"),
         DATA_DIR / "badge-rules.json": build_badge_json(
             "rules", f"{rule_count} verified", "8b5cf6"
         ),
-        DATA_DIR / "badge-status.json": build_badge_json(
-            "airlock", "building", "10b981"
-        ),
+        DATA_DIR / "badge-status.json": build_badge_json("airlock", "building", "10b981"),
     }
 
     stale = False
