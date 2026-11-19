@@ -77,7 +77,7 @@ Status: v0.2 (red-team revision). Outline of decisions an agent must not violate
 
 | Detector | Rules | Priority |
 |---|---|---|
-| `config_role` | `cfg-dynamic-code`, `cfg-network-exec`, `cfg-network`, `cfg-process-spawn`, `cfg-chain-endpoint`, `cfg-appended-tail`, `cfg-long-line`, `cfg-nul` | P0 |
+| `config_role` | `cfg-dynamic-code`, `cfg-network-exec`, `cfg-network`, `cfg-process-spawn`, `cfg-chain-endpoint`, `cfg-appended-tail`, `cfg-long-line` | P0 |
 | `wasm_manifest` | `wasm-unlisted`, `wasm-hash-mismatch`, `wasm-path-moved`, `wasm-manifest-stale`, `wasm-archive-skipped` | P0 |
 | `builtin_patterns` | rule data, not a code detector: `pat-decode-eval`, `pat-invisible-unicode` (HIGH), `pat-exfil-endpoint`, `pat-obfuscator-id` (WARN) | P0 |
 | `ci_surface` | `pat-secret-dump`, `pat-ptr-head-checkout`, `pat-lifecycle-exec` (HIGH, in code) and `pat-privileged-trigger`, `pat-lifecycle-fetch`, `pat-editor-command-path` (WARN, rule data) | P0 |

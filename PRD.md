@@ -175,7 +175,8 @@ Priority: **P0** ships in v0.1.0, **P1** in v0.2.0, **Later** is backlog (`ROADM
 | `cfg-chain-endpoint` | RPC hosts for TRON, Aptos and BSC | HIGH |
 | `cfg-appended-tail` | last non-empty line over `tail_max_len`, or a high-entropy blob near the end | HIGH |
 | `cfg-long-line` | a line over `line_cap`: regex rules skipped for that line | HIGH in `tooling-config`, WARN elsewhere |
-| `cfg-nul` | NUL byte in a text config (after UTF-16 BOM handling) | HIGH |
+
+NUL bytes after BOM handling are reported by the collector as the state finding `nul-in-text` across all roles, not as a `config_role` rule.
 
 Network alone is WARN because some legitimate Next.js configs fetch at build time (for example for redirects). [Unverified: stated from general knowledge of Next.js; confirm on the real corpus]
 

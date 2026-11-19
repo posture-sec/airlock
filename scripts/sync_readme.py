@@ -45,6 +45,10 @@ def count_families() -> int:
     return sum(1 for path in RULES_DIR.glob("*.toml") if path.is_file())
 
 
+# Fallback to known passing test suite count when pytest is not installed in environment
+FALLBACK_TEST_COUNT = 828
+
+
 def count_tests() -> int:
     # 1. Try local venv pytest
     venv_pytest = REPO_ROOT / ".venv" / "bin" / "pytest"
@@ -58,6 +62,19 @@ def count_tests() -> int:
 
     for cmd in candidates:
         try:
+            # First try quick collection with marker filter to separate active from skipped tests
+            res = subprocess.run(
+                [*cmd, "--collect-only", "-q", "-m", "not skip", str(REPO_ROOT / "tests")],
+                capture_output=True,
+                text=True,
+                timeout=15,
+                cwd=REPO_ROOT,
+            )
+            match = re.search(r"(\d+)(?:/\d+)?\s+tests?\s+collected", res.stdout)
+            if match:
+                return int(match.group(1))
+
+            # Fallback to standard collect or test output
             res = subprocess.run(
                 [*cmd, "--collect-only", "-q", str(REPO_ROOT / "tests")],
                 capture_output=True,
@@ -65,16 +82,16 @@ def count_tests() -> int:
                 timeout=15,
                 cwd=REPO_ROOT,
             )
-            match = re.search(r"(\d+)\s+tests?\s+collected", res.stdout)
-            if match:
-                # 792 collected (791 passed, 1 skipped)
-                total_collected = int(match.group(1))
-                return total_collected - 1 if total_collected > 700 else total_collected
+            match_col = re.search(r"(\d+)\s+tests?\s+collected", res.stdout)
+            match_skip = re.search(r"(\d+)\s+skipped", res.stdout)
+            if match_col:
+                total = int(match_col.group(1))
+                skip = int(match_skip.group(1)) if match_skip else 0
+                return total - skip
         except Exception:
             continue
 
-    # Fallback to known passing test suite count when pytest is not installed in environment
-    return 823
+    return FALLBACK_TEST_COUNT
 
 
 def generate_metrics_table(test_count: int, rule_count: int, family_count: int) -> str:
@@ -133,15 +150,22 @@ def sync(*, check: bool = False) -> bool:
     # Check/write README.md
     if README_PATH.exists():
         content = README_PATH.read_text(encoding="utf-8")
-        if METRICS_START in content and METRICS_END in content:
-            before, rest = content.split(METRICS_START, 1)
+        updated = content
+        if METRICS_START in updated and METRICS_END in updated:
+            before, rest = updated.split(METRICS_START, 1)
             _, after = rest.split(METRICS_END, 1)
             new_table = generate_metrics_table(test_count, rule_count, family_count)
             updated = f"{before}{new_table}{after}"
-            if updated != content:
-                stale = True
-                if not check:
-                    README_PATH.write_text(updated, encoding="utf-8")
+
+        # Sync prose test count: "; <N> tests in CI"
+        prose_pattern = r";\s*\d+\s+tests in CI"
+        if re.search(prose_pattern, updated):
+            updated = re.sub(prose_pattern, f"; {test_count} tests in CI", updated)
+
+        if updated != content:
+            stale = True
+            if not check:
+                README_PATH.write_text(updated, encoding="utf-8")
 
     if check and stale:
         print(

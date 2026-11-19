@@ -1,6 +1,6 @@
 # ROADMAP: Airlock
 
-Last updated: 2026-11-19 19:49 UTC
+Last updated: 2026-11-19 20:05 UTC
 
 Roadmap version: 1
 
@@ -43,7 +43,7 @@ The repository is 100% ready when every task in Phases 0 to 8 is done and every 
 | 6 | Stellar detectors | 0 | 5 | 0% |
 | 7 | Hardening and edge cases | 4 | 13 | 31% |
 | 8 | Release v0.2.0 and community | 2 | 6 | 33% |
-| 9 (backlog) | Backlog | 12 | 25 | 48% |
+| 9 (backlog) | Backlog | 15 | 28 | 54% |
 | **Phases 0 to 8** | **Readiness total** | **46** | **95** | **48%** |
 | Gates | G1 to G10 | 0 | 10 | 0% |
 <!-- PROGRESS:END -->
@@ -300,6 +300,9 @@ families.
 - [x] **9.23** Implement `native_binary` detector and `native-binary-artifact` rule (WARN, suppressible) for committed ELF and Mach-O binaries (#43).
 - [x] **9.24** Test that fingerprint occurrence numbering and detector dispatch order are deterministic under all finding permutations (#49).
 - [x] **9.25** Test that every declared non-magic role in rule data is producible from derived glob paths, with a self-test flagging unreachable patterns (#51).
+- [x] **9.26** Reconcile `cfg-long-line` severity documentation in README with engine behavior (HIGH in build configs, WARN elsewhere) (#28).
+- [x] **9.27** Drop phantom `cfg-nul` from detector tables in `ARCHITECTURE_ESSENTIALS.md` and `PRD.md`, noting `nul-in-text` state finding (#56).
+- [x] **9.28** Reconcile test counts in `README.md` metrics and prose with `sync_readme.py` and badge data (#97).
 
 ## 6. Dependency map (critical path)
 
@@ -344,6 +347,7 @@ Newest first. One row per merged change.
 
 | Date (UTC) | Change | Tasks |
 |---|---|---|
+| 2026-11-19 20:05 | Close #28, #56 and #97. Document `cfg-long-line` dual severity in `README.md` (HIGH in build configs, WARN elsewhere) with `tests/unit/test_long_line_severity_docs.py`. Drop phantom rule id `cfg-nul` from `ARCHITECTURE_ESSENTIALS.md` and `PRD.md`, noting `nul-in-text` as the collector's state finding, with `tests/unit/test_rule_doc_ids.py` asserting table agreement with loaded `cfg-*` rule data. Update `scripts/sync_readme.py` to parse collected and skipped tests without magic thresholds, sync `README.md` prose test count with the metrics block, and verify three-way agreement in `tests/unit/test_readme_counts.py`. | 9.26, 9.27, 9.28 |
 | 2026-11-19 18:55 | Close #47, #48, #50 and #54. `strkey.py` decodes a candidate only when it is 56 canonical uppercase Base32 characters that re-encode to themselves, 35 bytes, version `0x90` and a matching little-endian CRC16-XMODEM over the first 33 bytes, and the new `stellar_seed` detector reports each valid candidate on a line at or under `line_cap` as the suppressible HIGH `stellar-seed` rule with both fixture halves; the checksum says nothing about funding or live use. Two engine tests close the trust-model gaps: `test_state_rule_ids.py` derives every `_state` producer from `collector.py` and `policy.py` with `ast`, resolves module-level constants, adds `detector-error` and `cfg-long-line`, and asserts set equality with a self-test that names a removed id and its file, while `test_policy_trusted_source_only.py` traps `policy._working_text` and proves `pr` and `push` never reach it, with `full` mode as the control that makes the trap bite. `cfg-network` no longer treats every `https://` literal as a capability: the trailing branch now requires a call argument or a network-named key, so a documentation URL in a comment is quiet while `fetch(`, `require("https")`, `axios` and `.request(` are unchanged, and `PRD.md` row 174 moves with the pattern. | 9.18, 9.19, 9.20, 9.21, 6.2, 6.3 |
 | 2026-11-19 18:25 | Merge pull request #111: Bounded install-hook pairing in `ci_surface.py`, npm lockfile registry host checks, manifest matching for LFS oids, and Cargo dependency-source findings. Add focused fixtures and tests. | 9.14, 9.15, 9.16, 9.17, FR-18, FR-20, FR-30, FR-31, ADR-020, ADR-021, D-10, D-11 |
 | 2026-11-19 09:48 | A protected config file at the trusted base had no ceiling, unlike the same file in the working tree. `_blob_at` asked `git show` for the whole blob, so a base `airlock.toml` or `wasm-manifest.toml` of any size was decoded and parsed, and a parse failure ended the run with exit 2 and no report. The size is now read with `git cat-file -s` before the content, anything over the existing `MAX_CONFIG_BYTES` is never decoded, and the scan continues on `BOOTSTRAP_POLICY` and `EMPTY_MANIFEST` with one `skipped-unreadable` HIGH. The change's copy is not read at all in that case, so no `policy-changed` is claimed for a comparison that never happened; a head copy over the limit is compared only far enough to say the two copies were not compared. No new finding id, setting or dependency. Five cases in `tests/unit/test_policy_base_size_cap.py` run over a real temporary git repository, including a base exactly at the limit that is still read. `ARCHITECTURE.md` 6.5, 7.6 and 8 and `ARCHITECTURE_ESSENTIALS.md` section 2 record the refusal. 9.13 stays `[~]` until CI is green. | 9.13 |

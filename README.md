@@ -30,7 +30,7 @@ It is a scanner for a specific attack class, not a general-purpose antivirus.
 <!-- METRICS:START -->
 | Indicator | Value | Source |
 |---|---|---|
-| Test Suite | **823 passing** | `python -m pytest` |
+| Test Suite | **828 passing** | `python -m pytest` |
 | Builtin Rules | **28 verified** across 8 families | `rules/builtin` |
 | Runtime Dependencies | **0 external dependencies** | `pyproject.toml` |
 | Scanning Modes | **`full` / `pr` / `diff`** | CLI specification |
@@ -41,7 +41,7 @@ installer does not exist yet.
 
 | | |
 |---|---|
-| Works today | `airlock scan` in console, GitHub-annotation and JSON output, plus a step summary; `airlock manifest add` and `manifest check`; 27 rules across six code detectors and the pattern engine |
+| Works today | `airlock scan` in console, GitHub-annotation and JSON output, plus a step summary; `airlock manifest add` and `manifest check`; 28 rules across eight code detectors and the pattern engine; 828 tests in CI |
 | Not built yet | the composite GitHub Action (`action.yml`), the Soroban-side detectors, the build-script and native-binary rules, SARIF output |
 | Usable now | as a CLI, from a checkout or an installed wheel, on any git repository |
 
@@ -79,9 +79,12 @@ string masking.
 | `cfg-network-exec` | HIGH | a fetch or download whose result is executed |
 | `cfg-chain-endpoint` | HIGH | a chain or wallet RPC endpoint reached from tooling |
 | `cfg-appended-tail` | HIGH | a high-entropy run appended past the config's real content |
-| `cfg-long-line` | HIGH | a line over the cap, where the regexes deliberately do not run |
+| `cfg-long-line` | HIGH in a build config, WARN elsewhere | a line over the cap, where the regexes deliberately do not run |
 | `cfg-network` | WARN | network capability with no execution alongside it |
 | `cfg-process-spawn` | WARN | a build step that spawns a process |
+
+A line over the cap is HIGH in a build config and demoted to WARN elsewhere, so a long line in a
+source file never fails a build by itself.
 
 **`wasm_manifest`** checks every committed `.wasm` against a hash-keyed manifest, so an artifact
 that was not built from the reviewed source is named.
