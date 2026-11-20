@@ -354,7 +354,9 @@ def _write_step_summary(report: ScanReport) -> None:
         with open(target, "a", encoding="utf-8") as handle:
             handle.write(summary.render(report))
     except OSError as exc:
-        raise UsageError(f"cannot write the step summary to {target}: {exc}") from exc
+        print(
+            f"airlock: warning: cannot write the step summary to {target}: {exc}", file=sys.stderr
+        )
 
 
 def main(argv: list[str] | None = None) -> int:
