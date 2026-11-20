@@ -242,13 +242,15 @@ def _collect_one(
 
     if entry.is_symlink:
         # The target path is never read, so a tracked link cannot point the scanner outside
-        # the repository or at /home/*/.ssh.
+        # the repository or at /home/*/.ssh. A link in a sensitive role is still an unread
+        # file that would have run, so it is as loud as any other unread sensitive file.
+        roles = resolve_roles(entry.path, b"", role_globs)
         findings.append(
             _state(
                 "skipped-symlink",
-                Severity.INFO,
+                Severity.HIGH if _sensitive(roles) else Severity.INFO,
                 entry.path,
-                resolve_roles(entry.path, b"", role_globs),
+                roles,
                 "symlink in the index; its target was not read",
             )
         )
@@ -256,7 +258,7 @@ def _collect_one(
             FileEntry(
                 path=entry.path,
                 sha256=None,
-                roles=resolve_roles(entry.path, b"", role_globs),
+                roles=roles,
                 skip_reason=SKIP_SYMLINK,
             ),
             tuple(findings),
@@ -296,7 +298,7 @@ def _collect_one(
                 entry.path,
                 roles,
                 f"file is {size_bytes} bytes, over the {policy.max_file_bytes} byte limit, "
-                "and was not read past its first 4096 bytes",
+                f"and was not read past its first {HEAD_BYTES} bytes",
             )
         )
         return (

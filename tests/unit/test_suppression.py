@@ -183,6 +183,7 @@ class TestMatching:
         assert result.suppressed == ()
 
     def test_the_first_entry_wins_when_two_cover_one_fingerprint(self) -> None:
+        """The second entry is a duplicate, so it is reported instead of quietly dropped."""
         item = pending()
         result = run(
             item,
@@ -193,6 +194,7 @@ class TestMatching:
 
         assert len(result.suppressed) == 1
         assert result.suppressed[0].suppressed_by == "first entry"
+        assert ids(result) == ["suppression-invalid"]
 
 
 class TestOccurrences:

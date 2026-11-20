@@ -152,7 +152,11 @@ class TestDispatch:
         assert errors[0].severity is Severity.HIGH
         assert not errors[0].suppressible
         assert errors[0].path == "."
-        assert "detector fell over" in errors[0].message
+        # The exception text is evidence now, so scanned content cannot enter the message.
+        assert "Boom" in errors[0].message
+        assert "detector fell over" not in errors[0].message
+        assert errors[0].evidence is not None
+        assert "detector fell over" in errors[0].evidence
 
     def test_a_generator_that_fails_part_way_still_yields_what_it_found(
         self, registry: Any

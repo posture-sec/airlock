@@ -728,7 +728,18 @@ def suppress(
     for position, entry in enumerate(entries):
         if problems[position] is not None:
             continue
-        first_for.setdefault((entry.rule, entry.path, entry.fingerprint), position)
+        key = (entry.rule, entry.path, entry.fingerprint)
+        applied = first_for.get(key)
+        if applied is not None:
+            # The usual way to renew an entry is to copy it and move the date, which leaves two
+            # entries for one key. The first one keeps deciding, so saying so is the only way
+            # the author learns the renewed date has no effect.
+            problems[position] = (
+                f"duplicate: entry #{applied + 1} is consulted first, and this entry "
+                f"#{position + 1} covers nothing"
+            )
+            continue
+        first_for[key] = position
 
     active: list[Finding] = []
     covered: list[Finding] = []

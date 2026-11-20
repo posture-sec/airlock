@@ -35,8 +35,37 @@ def engine_findings(ctx: ScanContext) -> tuple[PendingFinding, ...]:
     return tuple(pending)
 
 
+def _visible_escapes(text: str) -> str:
+    """One line with every C0 control character spelled out.
+
+    The text comes from an exception raised while reading scanned content, so it can hold a
+    newline that forges a second annotation or a carriage return that overwrites the one above.
+    Escaping keeps the diagnostic without letting any byte of it act on the renderer.
+    """
+    out: list[str] = []
+    for char in text:
+        code = ord(char)
+        if char == "\n":
+            out.append("\\n")
+        elif char == "\r":
+            out.append("\\r")
+        elif char == "\t":
+            out.append("\\t")
+        elif code < 0x20 or code == 0x7F:
+            out.append(f"\\x{code:02x}")
+        else:
+            out.append(char)
+    return "".join(out)
+
+
 def _detector_error(detector: Detector, error: BaseException) -> PendingFinding:
-    """A detector that raised is a HIGH finding, never a silent gap in coverage."""
+    """A detector that raised is a HIGH finding, never a silent gap in coverage.
+
+    The message is scanner-written plus the in-tree module name and the exception type: an
+    exception raised while reading a file may quote a path or a line of it, and the report must
+    not present that text as the scanner's own sentence. The quoted text stays in the evidence,
+    with its control characters escaped so a renderer cannot be steered by it.
+    """
     name = getattr(detector, "__module__", repr(detector))
     detail = f"{name}: {type(error).__name__}: {error}"
     return PendingFinding(
@@ -47,11 +76,11 @@ def _detector_error(detector: Detector, error: BaseException) -> PendingFinding:
         roles=(),
         message=(
             "A detector raised and its coverage is missing from this scan: "
-            + detail[:MAX_MESSAGE_CHARS]
-        ),
+            f"{name}: {type(error).__name__}. The exception text is in the evidence."
+        )[:MAX_MESSAGE_CHARS],
         # The detail is the evidence, so two failures of one detector on one commit collapse to
         # one fingerprint while a different exception stays a new finding.
-        evidence=detail[:MAX_MESSAGE_CHARS],
+        evidence=_visible_escapes(detail)[:MAX_MESSAGE_CHARS],
         suppressible=False,
     )
 

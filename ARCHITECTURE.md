@@ -115,7 +115,7 @@ Removed since v0.1 of this document: `jsmask.py`, `wasmparse.py`, `detectors/dep
 - Reads each file once: size, first 4096 bytes and (lazily) the full bytes and SHA-256.
 - Checks that the bytes read match the file's recorded size on both the head-only read path and the full-read path. If the file shrinks or grows between the size check and the read, it yields `skipped-unreadable` (HIGH) without producing a hash or extracting text.
 - Decoding: honor a UTF-8 or UTF-16 BOM; otherwise decode UTF-8 strictly. Undecodable text yields `non-utf8-text` (HIGH in sensitive roles, WARN elsewhere). A NUL byte after BOM handling yields `nul-in-text`.
-- Never follows symlinks; a symlink is recorded as `skipped-symlink` (INFO) and its target path is not read.
+- Never follows symlinks; a symlink is recorded as `skipped-symlink` and its target path is not read. The severity is HIGH for the roles in `SENSITIVE_ROLES`, because a link in that set is an unread file that would have run, and INFO otherwise.
 - Enforces `max_file_bytes` (default 5,000,000). Oversized files yield `skipped-oversize`: WARN generally, HIGH for the roles in `SENSITIVE_ROLES` (`tooling-config`, `editor-autorun`, `workflow`, `package-manifest`, `install-hook`).
 - Enforces `line_cap` (default 20,000 characters). Lines over the cap are not passed to regex rules and yield `cfg-long-line`.
 - Startup checks: Python 3.11 or newer, `git` on PATH, repository readable (including the git `safe.directory` case). Failure exits 2 with a plain message.
@@ -134,7 +134,7 @@ A file may have several roles. Globs use a small internal matcher where `**` spa
 
 A detector is a function `run(ctx) -> Iterable[Finding]` registered in a plain list. (An earlier draft used a Protocol class and a registry object; a list of functions is enough.) `ScanContext` exposes exactly four things: the collected file entries with their roles, the trusted policy, the trusted manifest and the loaded rule data. It does not expose the trust model itself — see 7.9.
 
-Every call is wrapped: an exception becomes a HIGH `detector-error` and the remaining detectors still run. Findings a detector yielded before it raised are kept, so one failure on the tenth file costs the scan that file's coverage and nothing more. Third-party detector plugins are not supported, because loading external code would defeat the trust model.
+Every call is wrapped: an exception becomes a HIGH `detector-error` and the remaining detectors still run. Findings a detector yielded before it raised are kept, so one failure on the tenth file costs the scan that file's coverage and nothing more. The message is built only from scanner-written text, the in-tree detector module name and the exception type. The exception's own text moves to the evidence, with C0 control characters escaped visibly and newlines flattened, so a path or line fragment quoted by the exception cannot forge an annotation or hide the finding. Third-party detector plugins are not supported, because loading external code would defeat the trust model.
 
 The registry also names the valid `builtin:<name>` targets (`DETECTOR_NAMES`), so the rule loader rejects a rule pointing at a detector that does not exist. Two detectors are registered now: `config_role` and `wasm_manifest`.
 
@@ -348,6 +348,7 @@ Rules for suppressions:
 - `expires` is optional. 30 days before expiry a `suppression-expiring` WARN appears; after expiry only that finding returns, so builds do not turn red for a reason unrelated to a change (B10).
 - Entries for `suppressible = false` rules never apply and emit `suppression-invalid` (HIGH). The same holds for an entry naming a rule that is not loaded in this build, or a scanner-state rule id. State membership is checked before the rule lookup, including when a loaded rule disagrees. State findings always report `suppressible = false`; both the shipped `cfg-long-line` rule and its engine fallback agree. Validity is decided before matching, so a mistaken entry cannot hide a finding while the report complains about it.
 - An entry is checked against the rule data rather than against the scan's findings, so a rule that was renamed or made non-suppressible is reported even on a scan where the entry matched nothing.
+- A second valid entry with the same `rule`, `path` and `fingerprint` is a duplicate and emits `suppression-invalid` (HIGH). The report names both entry positions and says which one is consulted first. The first entry keeps deciding, including when it has expired, so the duplicate neither suppresses anything nor changes the covered finding's `suppressed_by`.
 - Unknown top-level keys emit `policy-unknown-key` (WARN); a missing or unsupported `version` exits 2.
 - The base copy is held to the same ceiling as the working tree. A blob over `MAX_CONFIG_BYTES` is refused before it is decoded, comes back as `skipped-unreadable` (HIGH) with the shipped defaults in its place, and the change's copy is not read, so no `policy-changed` is claimed for a comparison that never happened.
 
@@ -433,7 +434,7 @@ The invariant this enforces is that detector code cannot see less than it needs 
 | NUL byte in text after BOM handling | `nul-in-text` (HIGH) |
 | Undecodable text | `non-utf8-text` (HIGH sensitive roles, else WARN) |
 | Line over `line_cap` | `cfg-long-line` (HIGH in a `SENSITIVE_ROLES` file, else WARN); regex skipped for that line |
-| Symlink | `skipped-symlink` (INFO) |
+| Symlink | `skipped-symlink` (HIGH for sensitive roles, else INFO) |
 | Unmerged index entry (merge conflict) | `skipped-unmerged` (HIGH for sensitive roles, else WARN); no version of the file is read |
 | Submodule | `submodule-present` (INFO) |
 | Archive present | `wasm-archive-skipped` (WARN) |
