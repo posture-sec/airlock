@@ -1,6 +1,6 @@
 # ROADMAP: Airlock
 
-Last updated: 2026-11-19 20:05 UTC
+Last updated: 2026-11-20 15:03 UTC
 
 Roadmap version: 1
 
@@ -43,7 +43,7 @@ The repository is 100% ready when every task in Phases 0 to 8 is done and every 
 | 6 | Stellar detectors | 0 | 5 | 0% |
 | 7 | Hardening and edge cases | 4 | 13 | 31% |
 | 8 | Release v0.2.0 and community | 2 | 6 | 33% |
-| 9 (backlog) | Backlog | 15 | 28 | 54% |
+| 9 (backlog) | Backlog | 19 | 32 | 59% |
 | **Phases 0 to 8** | **Readiness total** | **46** | **95** | **48%** |
 | Gates | G1 to G10 | 0 | 10 | 0% |
 <!-- PROGRESS:END -->
@@ -303,6 +303,10 @@ families.
 - [x] **9.26** Reconcile `cfg-long-line` severity documentation in README with engine behavior (HIGH in build configs, WARN elsewhere) (#28).
 - [x] **9.27** Drop phantom `cfg-nul` from detector tables in `ARCHITECTURE_ESSENTIALS.md` and `PRD.md`, noting `nul-in-text` state finding (#56).
 - [x] **9.28** Reconcile test counts in `README.md` metrics and prose with `sync_readme.py` and badge data (#97).
+- [x] **9.29** Make the fingerprint payload self-delimiting: a NUL-free quadruple keeps the published `\0` join, and a field containing a NUL switches all four to length-prefixed fields behind a leading NUL marker (#19).
+- [x] **9.30** In push mode, report `history-rewritten` only for a genuine non-ancestor verdict; any other `merge-base --is-ancestor` failure raises `ValueError` naming the command so the CLI exits 2 (#12).
+- [x] **9.31** Contain the engine pass per entry: an exception from `apply_patterns` or `cap_findings` keeps earlier findings and adds a HIGH `detector-error` naming the entry and stage, so the scan still writes a report (#14).
+- [x] **9.32** Give `_GLOB_CHARS` the matcher's grammar (`*` and `?` only), so a literal bracketed suppression path such as `app/[id].tsx` loads while wildcards stay refused (#22).
 
 ## 6. Dependency map (critical path)
 
@@ -347,6 +351,7 @@ Newest first. One row per merged change.
 
 | Date (UTC) | Change | Tasks |
 |---|---|---|
+| 2026-11-20 15:03 | Close #12, #14, #19 and #22 in one pull request. `fingerprint._payload` keeps the published `\0` join byte for byte when no field contains a NUL, and switches all four fields to 8-byte length prefixes behind a leading NUL marker when one does; the marker cannot begin a normal payload because `rule_id` starts with a letter, and the pinned NUL-free digest is unchanged so stored suppressions keep matching. Push mode reads `merge-base --is-ancestor` through the new `collector.git_status` and treats only exit 1 with no error output as `history-rewritten`; a missing object, shallow checkout or timeout raises `ValueError` naming the command and git's error, which the CLI maps to exit 2. The engine pass now contains each stage per entry: a raise becomes a HIGH `detector-error` naming the entry and stage and earlier findings stay in the report. `_GLOB_CHARS` drops `[` to match `roles._segment_pattern`, so a suppression for a literal `app/[id].tsx` loads while `*` and `?` are still refused. New modules: `test_fingerprint_field_join.py`, `test_policy_trusted_ref_errors.py`, `test_runner_engine_containment.py`, `test_model_glob_grammar.py`; `ARCHITECTURE.md` 7.3 states the payload rule. | 9.29, 9.30, 9.31, 9.32 |
 | 2026-11-19 20:05 | Close #28, #56 and #97. Document `cfg-long-line` dual severity in `README.md` (HIGH in build configs, WARN elsewhere) with `tests/unit/test_long_line_severity_docs.py`. Drop phantom rule id `cfg-nul` from `ARCHITECTURE_ESSENTIALS.md` and `PRD.md`, noting `nul-in-text` as the collector's state finding, with `tests/unit/test_rule_doc_ids.py` asserting table agreement with loaded `cfg-*` rule data. Update `scripts/sync_readme.py` to parse collected and skipped tests without magic thresholds, sync `README.md` prose test count with the metrics block, and verify three-way agreement in `tests/unit/test_readme_counts.py`. | 9.26, 9.27, 9.28 |
 | 2026-11-19 18:55 | Close #47, #48, #50 and #54. `strkey.py` decodes a candidate only when it is 56 canonical uppercase Base32 characters that re-encode to themselves, 35 bytes, version `0x90` and a matching little-endian CRC16-XMODEM over the first 33 bytes, and the new `stellar_seed` detector reports each valid candidate on a line at or under `line_cap` as the suppressible HIGH `stellar-seed` rule with both fixture halves; the checksum says nothing about funding or live use. Two engine tests close the trust-model gaps: `test_state_rule_ids.py` derives every `_state` producer from `collector.py` and `policy.py` with `ast`, resolves module-level constants, adds `detector-error` and `cfg-long-line`, and asserts set equality with a self-test that names a removed id and its file, while `test_policy_trusted_source_only.py` traps `policy._working_text` and proves `pr` and `push` never reach it, with `full` mode as the control that makes the trap bite. `cfg-network` no longer treats every `https://` literal as a capability: the trailing branch now requires a call argument or a network-named key, so a documentation URL in a comment is quiet while `fetch(`, `require("https")`, `axios` and `.request(` are unchanged, and `PRD.md` row 174 moves with the pattern. | 9.18, 9.19, 9.20, 9.21, 6.2, 6.3 |
 | 2026-11-19 18:25 | Merge pull request #111: Bounded install-hook pairing in `ci_surface.py`, npm lockfile registry host checks, manifest matching for LFS oids, and Cargo dependency-source findings. Add focused fixtures and tests. | 9.14, 9.15, 9.16, 9.17, FR-18, FR-20, FR-30, FR-31, ADR-020, ADR-021, D-10, D-11 |

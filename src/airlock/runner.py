@@ -20,18 +20,48 @@ from __future__ import annotations
 
 from .detectors import DETECTORS, Detector
 from .fingerprint import PendingFinding, number_occurrences
-from .model import MAX_MESSAGE_CHARS, REPO_PATH, Finding, ScanContext, Severity
+from .model import MAX_MESSAGE_CHARS, REPO_PATH, FileEntry, Finding, ScanContext, Severity
 from .rules import apply_patterns, cap_findings
 
 DETECTOR_ERROR_RULE_ID = "detector-error"
 
 
+def _engine_error(stage: str, entry: FileEntry, error: BaseException) -> PendingFinding:
+    """An engine stage that raised is a HIGH gap, never a missing report.
+
+    The engine pass runs on every file, so it has the widest exposure of any stage. Naming the
+    entry and stage keeps the gap actionable, and the earlier findings stay in the report.
+    """
+    detail = f"{stage} on {entry.path}: {type(error).__name__}: {error}"
+    return PendingFinding(
+        rule_id=DETECTOR_ERROR_RULE_ID,
+        severity=Severity.HIGH,
+        path=REPO_PATH,
+        line=0,
+        roles=(),
+        message=(
+            "The engine pass raised and its coverage for this entry is missing from this scan: "
+            + detail[:MAX_MESSAGE_CHARS]
+        ),
+        evidence=detail[:MAX_MESSAGE_CHARS],
+        suppressible=False,
+    )
+
+
 def engine_findings(ctx: ScanContext) -> tuple[PendingFinding, ...]:
-    """Run the pattern rules and the line-cap account over every entry with text."""
+    """Run the pattern rules and the line-cap account over every entry with text.
+
+    Each stage is contained per entry, matching the detector boundary: a rule that raises on
+    one file must not discard the findings already collected or abort the scan.
+    """
     pending: list[PendingFinding] = []
+    stages = (("pattern rules", apply_patterns), ("line-cap account", cap_findings))
     for entry in ctx.entries:
-        pending.extend(apply_patterns(ctx.rules, entry, ctx.policy.line_cap))
-        pending.extend(cap_findings(ctx.rules, entry, ctx.policy.line_cap))
+        for stage, run in stages:
+            try:
+                pending.extend(run(ctx.rules, entry, ctx.policy.line_cap))
+            except Exception as error:
+                pending.append(_engine_error(stage, entry, error))
     return tuple(pending)
 
 

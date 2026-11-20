@@ -264,6 +264,8 @@ Ordering: severity descending, then `(path, line, rule_id)`, so output is determ
 fingerprint = sha256(rule_id \0 normalized_path \0 normalized_evidence \0 occurrence)
 ```
 
+The four fields are joined with a NUL byte, and the payload is self-delimiting: when any field contains a NUL, which only attacker-controlled evidence can, all four are length-prefixed behind a leading NUL marker instead. A NUL-free payload is byte identical to the formula above, so suppressions written before this rule keep matching.
+
 `normalized_evidence` is the matched line with outer whitespace stripped and internal whitespace runs collapsed. Line numbers are excluded so edits above a line do not invalidate a suppression. `occurrence` is the zero-based index of that identical evidence within the file, so a second copy of a suppressed line is a new, unsuppressed finding (B5). If an earlier duplicate is removed, indices shift and the suppression must be reissued; that fails closed. For file-level findings the file's SHA-256 replaces the evidence. A scanner-state finding (`skipped-oversize`, `history-rewritten`, `policy-unknown-key`) has neither a matched line nor file bytes, so it keys on its message: the message is written by the scanner, never by scanned content, and every state rule is non-suppressible, so rewording one cannot move an owner's suppression. A state finding whose message is blank, which a detector bug can produce, keys on `state:<rule_id>:<path>:<line>` instead of raising: one such finding must not turn the whole scan into a configuration error, and the same non-suppressibility means the line number in this one key cannot move a suppression. [Unverified: churn on real edits]
 
 ### 7.4 Rule file
