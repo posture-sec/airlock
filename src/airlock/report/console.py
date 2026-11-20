@@ -14,9 +14,32 @@ from __future__ import annotations
 from ..model import Finding, ScanReport, Severity
 
 
+def _escape_control(ch: str) -> str:
+    """Return the visible escape notation for one C0 control character.
+
+    CR, LF and CRLF are handled before this function is called: they collapse to
+    a space.  Every other byte below 0x20 and 0x7f is rendered as ``\\xNN`` so it is
+    visible to a reviewer and cannot manipulate a terminal or erase a previous line.
+    """
+    return f"\\x{ord(ch):02x}"
+
+
 def flatten(text: str) -> str:
-    """One line, whatever the input held."""
-    return text.replace("\r\n", " ").replace("\r", " ").replace("\n", " ")
+    """One line, whatever the input held.
+
+    1. Collapse CRLF, CR and LF to a single space (existing contract).
+    2. Escape every remaining C0 control character (< 0x20) and DEL (0x7f) to
+       ``\\xNN`` so a path like ``ESC[2K`` cannot clear the current terminal line
+       and overwrite the finding printed above it (issue #61).
+    """
+    # Step 1: collapse line-break sequences to a space.
+    normalised = text.replace("\r\n", " ").replace("\r", " ").replace("\n", " ")
+    # Step 2: escape remaining C0 controls and DEL.
+    if not any(ord(ch) < 0x20 or ord(ch) == 0x7F for ch in normalised):
+        return normalised
+    return "".join(
+        _escape_control(ch) if (ord(ch) < 0x20 or ord(ch) == 0x7F) else ch for ch in normalised
+    )
 
 
 def location(finding: Finding) -> str:

@@ -1,6 +1,6 @@
 # ROADMAP: Airlock
 
-Last updated: 2026-11-19 20:05 UTC
+Last updated: 2026-11-20 02:10 UTC
 
 Roadmap version: 1
 
@@ -43,7 +43,7 @@ The repository is 100% ready when every task in Phases 0 to 8 is done and every 
 | 6 | Stellar detectors | 0 | 5 | 0% |
 | 7 | Hardening and edge cases | 4 | 13 | 31% |
 | 8 | Release v0.2.0 and community | 2 | 6 | 33% |
-| 9 (backlog) | Backlog | 15 | 28 | 54% |
+| 9 (backlog) | Backlog | 19 | 32 | 59% |
 | **Phases 0 to 8** | **Readiness total** | **46** | **95** | **48%** |
 | Gates | G1 to G10 | 0 | 10 | 0% |
 <!-- PROGRESS:END -->
@@ -303,6 +303,10 @@ families.
 - [x] **9.26** Reconcile `cfg-long-line` severity documentation in README with engine behavior (HIGH in build configs, WARN elsewhere) (#28).
 - [x] **9.27** Drop phantom `cfg-nul` from detector tables in `ARCHITECTURE_ESSENTIALS.md` and `PRD.md`, noting `nul-in-text` state finding (#56).
 - [x] **9.28** Reconcile test counts in `README.md` metrics and prose with `sync_readme.py` and badge data (#97).
+- [x] **9.29** Implement SARIF 2.1.0 renderer: `render(report)` in `src/airlock/report/sarif.py` with `version`, `$schema`, one run, `tool.driver` (name, version, informationUri), and one result per finding with `ruleId`, `message.text` (rule message only, never evidence) and `physicalLocation` (repo-relative path, `startLine` only when non-zero). Register `"sarif": sarif.render` in `RENDERERS`. `tests/unit/test_sarif_document.py` proves shape, mapping and byte stability (#58).
+- [x] **9.30** Add `tool.driver.rules` array in first-seen order over findings and wire every result to its `ruleIndex`. Each entry carries `id`, `name` and `shortDescription.text` set to the rule id. `tests/unit/test_sarif_rules_index.py` proves one entry per distinct id, correct index resolution and empty-report case (#59).
+- [x] **9.31** Emit `partialFingerprints["airlock/v1"]` on every SARIF result, read verbatim from `finding.fingerprint` (validated by `_require_fingerprint`, never recomputed). `tests/unit/test_sarif_fingerprints.py` proves the settled key spelling (ADR-019), line-move invariance and occurrence-change difference (#60).
+- [x] **9.32** Extend `flatten` in `src/airlock/report/console.py` to escape every C0 control character below 0x20 and DEL (0x7f) as `\xNN`, while CR, LF and CRLF still collapse to one space. `tests/unit/test_console_control_chars.py` proves ESC and BEL escape, no raw byte reaches output, and the existing newline/CR-LF contracts hold (#61).
 
 ## 6. Dependency map (critical path)
 
@@ -347,6 +351,7 @@ Newest first. One row per merged change.
 
 | Date (UTC) | Change | Tasks |
 |---|---|---|
+| 2026-11-20 02:10 | Close #58, #59, #60 and #61. Implement the SARIF 2.1.0 renderer in `src/airlock/report/sarif.py`: `render(report)` builds a document with `version 2.1.0`, `$schema`, one run, `tool.driver` (name `airlock`, version from `report.tool_version`, `informationUri`), a `rules` array in first-seen order over findings (each entry with `id`, `name` and `shortDescription.text` set to the rule id), and one result per finding with `ruleId`, `ruleIndex` resolving into the rules array, `level`, `message.text` carrying the rule message only (never `evidence`, which is attacker-controlled, AGENTS.md section 4), one `physicalLocation` with `startLine` only when `finding.line` is non-zero, and `partialFingerprints["airlock/v1"]` read verbatim from `finding.fingerprint` (validated by `_require_fingerprint`, never recomputed, ADR-019). Register `"sarif": sarif.render` in `RENDERERS` in `src/airlock/cli.py`. Extend `flatten` in `src/airlock/report/console.py` to escape every C0 control character below 0x20 and DEL (0x7f) as `\xNN`; CR, LF and CRLF still collapse to one space. Three new test modules: `tests/unit/test_sarif_document.py` (shape, mapping, byte stability, evidence absent from message.text), `tests/unit/test_sarif_rules_index.py` (one entry per distinct id in first-seen order, ruleIndex resolution, empty-report case), `tests/unit/test_sarif_fingerprints.py` (airlock/v1 key spelling, line-move invariance, occurrence-change difference, verbatim read), `tests/unit/test_console_control_chars.py` (ESC and BEL escape, all C0 bytes, existing newline/CR-LF contracts). Verified: `python -m pytest tests/unit/test_sarif_document.py tests/unit/test_sarif_rules_index.py tests/unit/test_sarif_fingerprints.py tests/unit/test_console_control_chars.py` 46 passed; full suite 872 passed 1 skipped 2 failed (pre-existing ReDoS timing flakes unrelated to this change); `ruff check` and `ruff format --check` clean on 94 files; `mypy src` clean on 27 source files. | 9.29, 9.30, 9.31, 9.32 |
 | 2026-11-19 20:05 | Close #28, #56 and #97. Document `cfg-long-line` dual severity in `README.md` (HIGH in build configs, WARN elsewhere) with `tests/unit/test_long_line_severity_docs.py`. Drop phantom rule id `cfg-nul` from `ARCHITECTURE_ESSENTIALS.md` and `PRD.md`, noting `nul-in-text` as the collector's state finding, with `tests/unit/test_rule_doc_ids.py` asserting table agreement with loaded `cfg-*` rule data. Update `scripts/sync_readme.py` to parse collected and skipped tests without magic thresholds, sync `README.md` prose test count with the metrics block, and verify three-way agreement in `tests/unit/test_readme_counts.py`. | 9.26, 9.27, 9.28 |
 | 2026-11-19 18:55 | Close #47, #48, #50 and #54. `strkey.py` decodes a candidate only when it is 56 canonical uppercase Base32 characters that re-encode to themselves, 35 bytes, version `0x90` and a matching little-endian CRC16-XMODEM over the first 33 bytes, and the new `stellar_seed` detector reports each valid candidate on a line at or under `line_cap` as the suppressible HIGH `stellar-seed` rule with both fixture halves; the checksum says nothing about funding or live use. Two engine tests close the trust-model gaps: `test_state_rule_ids.py` derives every `_state` producer from `collector.py` and `policy.py` with `ast`, resolves module-level constants, adds `detector-error` and `cfg-long-line`, and asserts set equality with a self-test that names a removed id and its file, while `test_policy_trusted_source_only.py` traps `policy._working_text` and proves `pr` and `push` never reach it, with `full` mode as the control that makes the trap bite. `cfg-network` no longer treats every `https://` literal as a capability: the trailing branch now requires a call argument or a network-named key, so a documentation URL in a comment is quiet while `fetch(`, `require("https")`, `axios` and `.request(` are unchanged, and `PRD.md` row 174 moves with the pattern. | 9.18, 9.19, 9.20, 9.21, 6.2, 6.3 |
 | 2026-11-19 18:25 | Merge pull request #111: Bounded install-hook pairing in `ci_surface.py`, npm lockfile registry host checks, manifest matching for LFS oids, and Cargo dependency-source findings. Add focused fixtures and tests. | 9.14, 9.15, 9.16, 9.17, FR-18, FR-20, FR-30, FR-31, ADR-020, ADR-021, D-10, D-11 |

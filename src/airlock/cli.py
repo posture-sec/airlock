@@ -57,7 +57,7 @@ from .policy import (
     resolve_policy,
     suppress,
 )
-from .report import console, github, jsonout, summary
+from .report import console, github, jsonout, sarif, summary
 from .roles import known_roles
 from .rules import load_role_globs, load_rules
 
@@ -98,6 +98,7 @@ RENDERERS: Mapping[str, Callable[[ScanReport], str]] = {
     "console": console.render,
     "github": github.render,
     "json": jsonout.render,
+    "sarif": sarif.render,
 }
 
 STEP_SUMMARY_ENV = "GITHUB_STEP_SUMMARY"
