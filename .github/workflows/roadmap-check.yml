@@ -31,10 +31,11 @@ jobs:
       - name: Install the package and pytest
         run: python -m pip install --quiet . "pytest>=8"
 
+      # test_workflow_injection.py guards the env-to-shell boundary here.
       - name: ROADMAP.md was updated
         env:
           BASE_REF: ${{ github.base_ref }}
-        run: sh scripts/check_roadmap_touched.sh "origin/${BASE_REF}"
+        run: sh scripts/check_roadmap_touched.sh "refs/remotes/origin/${BASE_REF}"
 
       - name: The progress table matches the task lines
         run: python scripts/roadmap_progress.py --check

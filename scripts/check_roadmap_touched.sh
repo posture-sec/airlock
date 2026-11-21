@@ -6,22 +6,27 @@
 #   2. the `Last updated` line must actually have moved, because a PR that ticks nothing and
 #      rewrites nothing leaves the document claiming a state it no longer describes.
 #
-# Usage: scripts/check_roadmap_touched.sh <base-ref>
-# In a workflow the base ref is origin/$GITHUB_BASE_REF. A branch with no commits ahead of its
+# Usage: scripts/check_roadmap_touched.sh <refs/heads/name|refs/remotes/name>
+# In a workflow the base ref is refs/remotes/origin/$GITHUB_BASE_REF. A branch with no commits ahead of its
 # base passes: there is no change to describe.
 
 set -eu
 
 base="${1:-}"
 if [ -z "$base" ] && [ -n "${GITHUB_BASE_REF:-}" ]; then
-    base="origin/${GITHUB_BASE_REF}"
+    base="refs/remotes/origin/${GITHUB_BASE_REF}"
 fi
 if [ -z "$base" ]; then
     echo "check_roadmap_touched: no base ref; pass one or set GITHUB_BASE_REF" >&2
     exit 1
 fi
 
-if ! git rev-parse --verify --quiet "${base}^{commit}" >/dev/null; then
+case "$base" in
+    refs/heads/?*|refs/remotes/?*) ;;
+    *) echo "check_roadmap_touched: invalid base ref '$base'; expected refs/heads/<name> or refs/remotes/<name>" >&2; exit 1 ;;
+esac
+
+if ! git rev-parse --verify --quiet --end-of-options "${base}^{commit}" >/dev/null; then
     echo "check_roadmap_touched: ${base} is not a commit here; fetch the base branch" >&2
     exit 1
 fi

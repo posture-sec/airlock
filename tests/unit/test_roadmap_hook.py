@@ -151,14 +151,14 @@ class TestNoBaseRef:
     def test_an_unresolvable_environment_base_ref_is_refused_by_name(self, repo: Path) -> None:
         result = run_hook(repo, base_ref_env="release/9", clear_base_ref=True)
         assert result.returncode == 1
-        assert "origin/release/9 is not a commit here" in result.stderr
+        assert "refs/remotes/origin/release/9 is not a commit here" in result.stderr
 
 
 class TestUnresolvableBase:
     def test_an_argument_that_is_not_a_commit_exits_1_naming_it(self, repo: Path) -> None:
-        result = run_hook(repo, "no-such-branch", clear_base_ref=True)
+        result = run_hook(repo, "refs/heads/no-such-branch", clear_base_ref=True)
         assert result.returncode == 1
-        assert "no-such-branch is not a commit here" in result.stderr
+        assert "refs/heads/no-such-branch is not a commit here" in result.stderr
 
     def test_the_argument_wins_over_the_environment(self, repo: Path) -> None:
         """The workflow always passes the base positionally, so the argument has to decide.
@@ -166,9 +166,11 @@ class TestUnresolvableBase:
         A script that consulted `GITHUB_BASE_REF` first would report an error naming the variable
         rather than the ref the caller actually typed.
         """
-        result = run_hook(repo, "no-such-branch", base_ref_env="main", clear_base_ref=True)
+        result = run_hook(
+            repo, "refs/heads/no-such-branch", base_ref_env="main", clear_base_ref=True
+        )
         assert result.returncode == 1
-        assert "no-such-branch is not a commit here" in result.stderr
+        assert "refs/heads/no-such-branch is not a commit here" in result.stderr
 
     def test_an_unrelated_history_reports_no_merge_base_rather_than_an_empty_diff(
         self, repo: Path
@@ -181,15 +183,15 @@ class TestUnresolvableBase:
         """
         git(repo, "checkout", "-q", "--orphan", "unrelated")
         commit(repo, **{"src.py": "x = 1\n"})
-        result = run_hook(repo, "main", clear_base_ref=True)
+        result = run_hook(repo, "refs/heads/main", clear_base_ref=True)
         assert result.returncode == 1
-        assert "cannot find a merge base with main" in result.stderr
+        assert "cannot find a merge base with refs/heads/main" in result.stderr
 
 
 class TestRoadmapMustBeTouched:
     def test_a_change_that_skips_the_roadmap_exits_1(self, repo: Path) -> None:
         commit(repo, **{"src.py": "x = 1\n"})
-        result = run_hook(repo, "main", clear_base_ref=True)
+        result = run_hook(repo, "refs/heads/main", clear_base_ref=True)
         assert result.returncode == 1
         assert "touches files but not ROADMAP.md" in result.stdout
         assert "AGENTS.md section 1" in result.stdout
@@ -198,7 +200,7 @@ class TestRoadmapMustBeTouched:
         self, repo: Path
     ) -> None:
         commit(repo, **{"src.py": "x = 1\n", "ROADMAP.md": roadmap() + "\nA note.\n"})
-        result = run_hook(repo, "main", clear_base_ref=True)
+        result = run_hook(repo, "refs/heads/main", clear_base_ref=True)
         assert result.returncode == 1
         assert "its 'Last updated' line did not" in result.stdout
         assert BASE_DATE in result.stdout
@@ -210,20 +212,20 @@ class TestRoadmapMustBeTouched:
         change" for a roadmap that simply lost its header, sending the reader to the wrong fix.
         """
         commit(repo, **{"src.py": "x = 1\n", "ROADMAP.md": roadmap(None)})
-        result = run_hook(repo, "main", clear_base_ref=True)
+        result = run_hook(repo, "refs/heads/main", clear_base_ref=True)
         assert result.returncode == 1
         assert "no 'Last updated:' line" in result.stderr
 
 
 class TestPassingCases:
     def test_a_branch_with_nothing_ahead_of_its_base_exits_0(self, repo: Path) -> None:
-        result = run_hook(repo, "main", clear_base_ref=True)
+        result = run_hook(repo, "refs/heads/main", clear_base_ref=True)
         assert result.returncode == 0, result.stdout + result.stderr
         assert "nothing changed" in result.stdout
 
     def test_a_change_plus_a_moved_date_exits_0_and_reports_both_dates(self, repo: Path) -> None:
         commit(repo, **{"src.py": "x = 1\n", "ROADMAP.md": roadmap(NEW_DATE)})
-        result = run_hook(repo, "main", clear_base_ref=True)
+        result = run_hook(repo, "refs/heads/main", clear_base_ref=True)
         assert result.returncode == 0, result.stdout + result.stderr
         assert f"{BASE_DATE} -> {NEW_DATE}" in result.stdout
 
@@ -232,6 +234,6 @@ class TestPassingCases:
         and the branch changes a file so the "nothing changed" exit cannot be what saves it.
         """
         commit(repo, **{"ROADMAP.md": roadmap() + "\nAnother note.\n"})
-        result = run_hook(repo, "main", clear_base_ref=True)
+        result = run_hook(repo, "refs/heads/main", clear_base_ref=True)
         assert result.returncode == 1
         assert "its 'Last updated' line did not" in result.stdout

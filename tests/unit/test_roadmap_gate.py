@@ -62,7 +62,7 @@ def base_ref(root: Path) -> str:
     one covers a clone whose remote is not called `origin`. Returning "" instead of raising lets
     the caller state which assumption about the checkout was not met.
     """
-    for ref in ("origin/main", "main"):
+    for ref in ("refs/remotes/origin/main", "refs/heads/main"):
         if run("git", "rev-parse", "--verify", "--quiet", ref, cwd=root).returncode == 0:
             return ref
     return ""
@@ -149,7 +149,7 @@ class TestRoadmapTouched:
         (branch_repo / "src.py").write_text("x = 1\n", encoding="utf-8")
         git(branch_repo, "add", "-A")
         git(branch_repo, "commit", "-q", "-m", "code only")
-        result = run("sh", str(TOUCHED), "main", cwd=branch_repo)
+        result = run("sh", str(TOUCHED), "refs/heads/main", cwd=branch_repo)
         assert result.returncode == 1
         assert "ROADMAP.md" in result.stdout
 
@@ -160,18 +160,18 @@ class TestRoadmapTouched:
         )
         git(branch_repo, "add", "-A")
         git(branch_repo, "commit", "-q", "-m", "code and roadmap")
-        assert run("sh", str(TOUCHED), "main", cwd=branch_repo).returncode == 0
+        assert run("sh", str(TOUCHED), "refs/heads/main", cwd=branch_repo).returncode == 0
 
     def test_a_roadmap_edit_that_left_the_timestamp_alone_fails(self, branch_repo: Path) -> None:
         (branch_repo / "ROADMAP.md").write_text(HEAD + "\nA note.\n", encoding="utf-8")
         git(branch_repo, "add", "-A")
         git(branch_repo, "commit", "-q", "-m", "roadmap without a new timestamp")
-        result = run("sh", str(TOUCHED), "main", cwd=branch_repo)
+        result = run("sh", str(TOUCHED), "refs/heads/main", cwd=branch_repo)
         assert result.returncode == 1
         assert "Last updated" in result.stdout
 
     def test_a_branch_with_no_commits_ahead_is_not_a_failure(self, branch_repo: Path) -> None:
-        assert run("sh", str(TOUCHED), "main", cwd=branch_repo).returncode == 0
+        assert run("sh", str(TOUCHED), "refs/heads/main", cwd=branch_repo).returncode == 0
 
     def test_this_branch_passes_the_gate_it_is_adding(self) -> None:
         """If the gate cannot be satisfied by the work that adds it, it is the wrong gate."""

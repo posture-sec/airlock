@@ -15,11 +15,18 @@ on:
 permissions:
   contents: read
 
+# CI runs may be cancelled when a newer push supersedes them; Pages publishes cannot.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   # `pyproject.toml` declares `requires-python = ">=3.11"`, which is a promise about 3.12 and 3.13
   # too, so the suite runs on each of the three rather than only on the floor.
   checks:
     runs-on: ubuntu-latest
+    # Bounds the complete test/lint/type matrix job, including installation.
+    timeout-minutes: 30
     strategy:
       # With the default `fail-fast: true` a break that only shows on 3.13 cancels the 3.11 run,
       # and 3.11 is the job that answers whether the declared floor still holds.

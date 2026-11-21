@@ -50,6 +50,7 @@ from .model import (
     ScanContext,
     ScanReport,
     Severity,
+    require_repo_path,
     severity_from_name,
 )
 from .policy import (
@@ -299,15 +300,28 @@ def run_scan(
     )
 
 
+def _checked_config_path(repo: Path, value: str, flag: str) -> str:
+    """Keep a config-style path inside the operator's scanned directory."""
+    root = repo.resolve()
+    try:
+        require_repo_path(value, flag)
+        (root / value).resolve().relative_to(root)
+    except ValueError as exc:
+        raise UsageError(f"{flag} path {value!r} must resolve inside repository {root}") from exc
+    return value
+
+
 def _scan_command(args: argparse.Namespace) -> int:
     repo = Path(args.path)
+    config = _checked_config_path(repo, args.config, "--config")
+    manifest = _checked_config_path(repo, args.manifest, "--wasm-manifest")
     report = run_scan(
         repo,
         _mode_for(args),
         base=args.base,
         before=args.before,
-        config=args.config,
-        manifest=args.manifest,
+        config=config,
+        manifest=manifest,
         fail_on=severity_from_name(args.fail_on) if args.fail_on else None,
         rules_dir=args.rules_dir,
         roles_file=args.roles,
@@ -358,11 +372,14 @@ def _manifest_check(args: argparse.Namespace) -> int:
     rule fires at or above `fail_on`, so an unlisted or swapped artifact stops the line while
     manifest rot (a stale entry, a moved path) is named without stopping it.
     """
+    repo = Path(args.path)
+    config = _checked_config_path(repo, args.config, "--config")
+    manifest = _checked_config_path(repo, args.manifest, "--wasm-manifest")
     report = run_scan(
-        Path(args.path),
+        repo,
         Mode.FULL,
-        config=args.config,
-        manifest=args.manifest,
+        config=config,
+        manifest=manifest,
         rules_dir=args.rules_dir,
         roles_file=args.roles,
         keep=lambda finding: finding.rule_id.startswith(WASM_RULE_PREFIX),

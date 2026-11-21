@@ -120,7 +120,7 @@ Changes here are security-relevant. They need CODEOWNERS review and extra care f
 | `rules/` | Detection logic |
 | `action.yml`, `.github/workflows/` | Supply chain of the tool itself |
 | `airlock.toml`, `wasm-manifest.toml` | Dogfood policy; a bad edit disables checks |
-| `scripts/` | The roadmap gate and the site generator |
+| `scripts/` | The roadmap gate (full branch refs only) and the site generator |
 | `.github/CODEOWNERS` | Review enforcement |
 
 ## 3. Import rules (dependency direction)

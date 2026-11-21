@@ -165,6 +165,8 @@ mode push:
       of HEAD (git merge-base --is-ancestor): finding history-rewritten (HIGH), bootstrap defaults
 mode full (local, manual, scheduled):
     read from the working tree, emit untrusted-policy-source (INFO) so the weaker guarantee is visible
+    CLI checks both config paths against the resolved repository root before any read;
+    a symlink outside the root is a usage error (exit 2), while an internal link is allowed
 
 for each policy file:
     use the version at base; if the head version differs, emit policy-changed (WARN) with a diff summary

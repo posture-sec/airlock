@@ -1,6 +1,6 @@
 # ROADMAP: Airlock
 
-Last updated: 2026-11-21 18:30 UTC
+Last updated: 2026-11-21 19:22 UTC
 
 Roadmap version: 1
 
@@ -43,7 +43,7 @@ The repository is 100% ready when every task in Phases 0 to 8 is done and every 
 | 6 | Stellar detectors | 0 | 5 | 0% |
 | 7 | Hardening and edge cases | 4 | 13 | 31% |
 | 8 | Release v0.2.0 and community | 2 | 6 | 33% |
-| 9 (backlog) | Backlog | 70 | 83 | 84% |
+| 9 (backlog) | Backlog | 74 | 87 | 85% |
 | **Phases 0 to 8** | **Readiness total** | **46** | **95** | **48%** |
 | Gates | G1 to G10 | 0 | 10 | 0% |
 <!-- PROGRESS:END -->
@@ -358,6 +358,11 @@ families.
 - [x] **9.81** Hold `project_structure.md` to the tree it describes (#100). M. Deps: 1.4, 1.11. Done when: `tests/unit/test_project_structure.py` parses the fenced module map, walks `src/airlock/` and `tests/`, and fails on a module on disk the map does not list and on a map entry with no file behind it; the map's own `Removed on purpose` paragraph is the only exemption, so an entry cannot be hidden by a comment in the test. (the first run named two real gaps: `src/airlock/detectors/native_binary.py`, which the detector registry lists and the map did not, and `src/airlock/report/__init__.py`, which is the issue's own example and is correct. Both rows are in the map now, with the ref column aligned to the block that already had one. The exemption is read from the paragraph rather than from a list in this file, which is what makes the reverse direction mean something: deleting a file and leaving its row fails, and deleting a file with a row that says it was removed on purpose passes.)
 - [x] **9.82** Run the commands the README tells a new user to run (#101). M. Deps: 1.10, 2.10. Done when: the bash fences under `## Quick start` are extracted with shell continuations joined, the clone and install lines are filtered out by rule, and each surviving line is executed as a subprocess with `cwd` in a temporary git repository and nothing rewritten: `airlock scan --mode full` exits 0 and prints `0 HIGH`, `airlock manifest add target/*/*.wasm ...` writes `wasm-manifest.toml` and `airlock manifest check` then exits 0, the `PYTHONPATH=src python3 -m airlock scan --mode full` line runs as written, and a repository carrying a payload exits with the number the page's exit-code table gives it. (the command text comes from the page, because a copy of it in the test would test the copy. Exit codes are read from the table in the same section, so a failure says which row is contradicted rather than asserting a constant. Two things the run found that rereading the page would not: the `--build "cargo build --release --target ..."` value carries flag-shaped words that belong to cargo, so a flag is only counted outside quotes, and the module-run line resolves `src` relative to the working directory, so the temporary repository carries a symlink to the package rather than an absolute `PYTHONPATH`. The rename this task exists for is recorded here: with `--mode` changed to `--model` in the extracted text the documented exit 0 becomes argparse's 2, and the flag check names the flag before the subprocess does.)
 - [x] **9.83** Install the version floors the project already declares (#102). S. Deps: 1.5, 1.6. Done when: `.github/workflows/ci.yml` installs `.` with `"pytest>=8" "ruff>=0.6" "mypy>=1.11"` quoted, `.github/workflows/pr-mode.yml` and `.github/workflows/roadmap-check.yml` carry the same floor for the one tool they need, and `tests/unit/test_ci_tool_versions.py` reads every `pip install` line in every workflow and the `[dependency-groups] dev` list in `pyproject.toml` and fails on a tool, a floor or a quote that disagrees. (the defect is not only that the floors float: pasted into a `run:` block without quotes, `pytest>=8` is the word `pytest` with standard output redirected into a file named `=8`, so the specifier does not fail the install, it disappears from it. The test reads each workflow as lines instead of a parsed scalar, and why it asserts on the quote characters as well as the value. A job is allowed to install a subset of the group -- the roadmap gate runs pytest and nothing else -- and adding a tool to the group does not invent it into CI, so neither side can force the other. `pip install .` itself is asserted to stay, because the self-scan job is the installed console script and a wheel missing its rule data has to fail there.)
+
+- [x] **9.84** Reject config and manifest paths that resolve outside the scanned repository, including symlink escapes (#72). Tests cover lexical escapes, outside and inside symlinks, and manifest check.
+- [x] **9.85** Bound CI checks with workflow/ref concurrency and a 30-minute job timeout (#78). A text guard holds both settings.
+- [x] **9.86** Refuse GitHub context interpolation in workflow `run:` scalars (#79). The guard scans inline and block commands while allowing expressions under `env:`.
+- [x] **9.87** Require full branch refs for the roadmap gate (#80). Validate before Git, pass the workflow's remote ref, and use `--end-of-options` for rev parsing.
 
 ## 6. Dependency map (critical path)
 
