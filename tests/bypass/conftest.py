@@ -16,7 +16,8 @@ from collections.abc import Callable
 from pathlib import Path
 
 import pytest
-from scripts.bypass_probe import ALLOW_MARKER, CASES, Case, build
+from scripts.bypass_probe import ALLOW_MARKER, CASES, Case
+from tests.conftest import build_scratch_repo
 
 from airlock.cli import run_scan
 from airlock.model import Mode, ScanReport, Severity
@@ -29,10 +30,15 @@ def _case(number: int) -> Case:
 
 
 def _scan_files(root: Path, files: dict[str, bytes], name: str) -> ScanReport:
-    """Commit one shape into a scratch repository and run the real scan over it."""
+    """Commit one shape into a scratch repository and run the real scan over it.
+
+    `build_scratch_repo` is the shared factory: same base commit, same payload commit,
+    same tracked-at-HEAD semantics as `scripts.bypass_probe.build` produced when this
+    module used to call it directly. Delegating means the harness that measured the old
+    script and these tests that judge this package cannot disagree about what a case is.
+    """
     repo = root / name
-    repo.mkdir()
-    build(repo, files)
+    build_scratch_repo(repo, files)
     return run_scan(repo, Mode.FULL)
 
 

@@ -14,10 +14,10 @@ the two severities that can fail a job are checked against `run_scan`, which dec
 
 from __future__ import annotations
 
-import subprocess
 from pathlib import Path
 
 import pytest
+from tests.conftest import git_in
 
 from airlock import detectors, runner
 from airlock.cli import run_scan
@@ -91,33 +91,16 @@ WORKFLOW_HEAD = (
 )
 
 
-def git(root: Path, *args: str) -> str:
-    result = subprocess.run(
-        [
-            "git",
-            "-C",
-            str(root),
-            "-c",
-            "user.name=airlock-test",
-            "-c",
-            "user.email=airlock-test@example.invalid",
-            "-c",
-            "core.hooksPath=/dev/null",
-            *args,
-        ],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    return result.stdout
-
-
 @pytest.fixture
-def repo(tmp_path: Path) -> Path:
-    root = tmp_path / "repo"
-    root.mkdir()
-    git(root, "init", "-q", "--initial-branch=main")
-    return root
+def repo(scratch_repo) -> Path:
+    """Init-only scratch tree; `commit_files` below makes the actual commit.
+
+    The factory owns the `git init --initial-branch=main` and the identity flags; this
+    module still writes and commits its own payload through `commit_files` because the
+    CI-surface tests want one commit that contains both `airlock.toml` and the file
+    under test, not the two-commit bypass shape.
+    """
+    return scratch_repo({}, base_files={}, name="repo").root
 
 
 def commit_files(root: Path, files: dict[str, str]) -> None:
@@ -125,8 +108,8 @@ def commit_files(root: Path, files: dict[str, str]) -> None:
         path = root / rel
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text, encoding="utf-8")
-    git(root, "add", "-A")
-    git(root, "commit", "-q", "-m", "fixture")
+    git_in(root, "add", "-A")
+    git_in(root, "commit", "-q", "-m", "fixture")
 
 
 def roles_of(path: str) -> tuple[str, ...]:

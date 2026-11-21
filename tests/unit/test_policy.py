@@ -7,11 +7,11 @@ would let a wrong `git` argument list pass.
 
 from __future__ import annotations
 
-import subprocess
 from datetime import date
 from pathlib import Path
 
 import pytest
+from tests.conftest import git_in
 from tests.fixtures import assemble
 
 from airlock import policy
@@ -64,32 +64,19 @@ PAYLOAD = f"{assemble('ev', 'al')}({assemble('Buf', 'fer.from')}(process.env.P, 
 
 
 def git(root: Path, *args: str) -> str:
-    result = subprocess.run(
-        [
-            "git",
-            "-C",
-            str(root),
-            "-c",
-            "user.name=airlock-test",
-            "-c",
-            "user.email=airlock-test@example.invalid",
-            "-c",
-            "core.hooksPath=/dev/null",
-            *args,
-        ],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    return result.stdout
+    """Alias onto the factory's git call, so the follow-up commits here and the base commit
+    made by `scratch_repo` share identity and hooks."""
+    return git_in(root, *args)
 
 
 @pytest.fixture
-def repo(tmp_path: Path) -> Path:
-    root = tmp_path / "repo"
-    root.mkdir()
-    git(root, "init", "-q", "--initial-branch=main")
-    return root
+def repo(scratch_repo) -> Path:
+    """Init-only scratch tree; the seed/write/commit helpers below make the actual commits.
+
+    The factory owns `git init --initial-branch=main` and the identity flags so this
+    trusted-base module does not redefine them, matching issue #92 §2.
+    """
+    return scratch_repo({}, base_files={}, name="repo").root
 
 
 def write(root: Path, rel: str, data: str) -> None:
