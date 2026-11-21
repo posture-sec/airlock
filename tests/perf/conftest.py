@@ -20,9 +20,12 @@ handling. The trigger shapes already live in `tests/bypass/`, not here.
 from __future__ import annotations
 
 import os
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
+
+if TYPE_CHECKING:
+    from tests.conftest import ScratchRepo
 
 PERF_ENV = "AIRLOCK_PERF"
 PERF_MARKER = "perf"
@@ -117,18 +120,21 @@ def total_bytes(paths: list[tuple[str, bytes]]) -> int:
 
 
 @pytest.fixture(scope="module")
-def large_repo(tmp_path_factory: pytest.TempPathFactory) -> Path:
+def large_repo(tmp_path_factory: pytest.TempPathFactory) -> ScratchRepo:
     """A 50k-file repository, built once for the whole perf module.
 
     The scan runs three times against the same tree so the median is a scan measurement
     rather than a build measurement. The tree is written by `build_scratch_repo` from
     `tests/conftest.py` -- one git HEAD commit, which is what `airlock.cli.run_scan`
     expects (`src/airlock/collector.py:121`).
+
+    The fixture hands back the `ScratchRepo`, not just the root, because the per-file
+    ceilings need the exact payload count. `root.rglob("*")` also yields every directory,
+    which divides the cost by ~57k instead of 50k and quietly weakens the guard.
     """
     from tests.conftest import build_scratch_repo
 
     paths = build_role_mix(50_000)
     root = tmp_path_factory.mktemp("large-repo")
     files = {path: data for path, data in paths}
-    build_scratch_repo(root, files, base_files={})
-    return root
+    return build_scratch_repo(root, files, base_files={})
