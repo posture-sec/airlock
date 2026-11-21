@@ -398,12 +398,19 @@ class ScanContext:
 
 @dataclass(frozen=True, slots=True)
 class ScanReport:
-    """The whole scan result, serialized by the json reporter."""
+    """The whole scan result, serialized by the json reporter.
+
+    `files_indexed` is the git index total, and the two counters partition it: an entry with a
+    skip reason is skipped even when it carries a digest (an encoding skip is hashed before it is
+    decoded), and only a digest with no skip reason counts as scanned. `run_scan` refuses a report
+    whose counters do not add up, so no entry leaves the report unaccounted for.
+    """
 
     tool_version: str
     mode: Mode
     repo_head: str
     base: str | None
+    files_indexed: int
     files_scanned: int
     files_skipped: Mapping[str, int]
     findings: tuple[Finding, ...]

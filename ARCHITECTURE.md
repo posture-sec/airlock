@@ -389,12 +389,17 @@ class ScanReport:
     mode: Mode
     repo_head: str
     base: str | None
-    files_scanned: int
-    files_skipped: dict[str, int]     # reason -> count
+    files_indexed: int               # every entry the index lists
+    files_scanned: int               # a digest and no skip reason
+    files_skipped: dict[str, int]    # reason -> count
     findings: list[Finding]
     suppressed: list[Finding]
     exit_code: int
 ```
+
+The three file counts are a partition, not a summary. `files_indexed` is `len(collection.entries)`, one entry per path `git ls-files --stage` returns after the collector folds a conflict's staged versions into one entry. An entry with a `skip_reason` belongs to `files_skipped`, even when it also carries a digest: an encoding skip is hashed before it is decoded, so counting digits alone would count that file twice and break the sum. `files_scanned` is therefore an entry with a digest and no skip reason. A binary entry (Wasm, ELF, Mach-O, archive) counts as scanned: its bytes are hashed and role-tagged, and the byte detectors read it, so the report says it was read rather than skipped.
+
+`run_scan` computes the three counts and raises `ValueError` naming all of them when scanned plus skipped does not equal the index total. The CLI maps that to exit 2, so an entry that is neither read nor named by a skip fails the run instead of disappearing from a report that claims to be complete.
 
 ### 7.9 FileEntry and ScanContext
 

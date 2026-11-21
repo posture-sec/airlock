@@ -89,6 +89,7 @@ def report(
         mode=kwargs.pop("mode", Mode.PR),  # type: ignore[arg-type]
         repo_head=str(kwargs.pop("repo_head", "b" * 40)),
         base=kwargs.pop("base", "c" * 40),  # type: ignore[arg-type]
+        files_indexed=int(kwargs.pop("files_indexed", 12)),
         files_scanned=int(kwargs.pop("files_scanned", 12)),
         files_skipped=dict(kwargs.pop("files_skipped", {})),  # type: ignore[arg-type]
         findings=findings,

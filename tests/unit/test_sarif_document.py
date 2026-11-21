@@ -55,6 +55,7 @@ def _report(*findings: Finding, tool_version: str = "0.1.0") -> ScanReport:
         mode=Mode.PR,
         repo_head="b" * 40,
         base="c" * 40,
+        files_indexed=5,
         files_scanned=5,
         files_skipped={},
         findings=findings,
