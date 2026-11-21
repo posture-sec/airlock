@@ -65,7 +65,7 @@ Status: v0.2 (red-team revision). Outline of decisions an agent must not violate
 - Suppression (in `airlock.toml`): rule, path, fingerprint, reason, optional expires. No owner, no globs.
 - Policy keys: `version`, `[policy]` (fail_on, max_file_bytes, line_cap, tail_max_len, tail_entropy), `[soroban]`, `[[suppress]]`.
 - Wasm manifest entry: sha256, paths[], origin (built|vendored|generated), source, build, note. Keyed by hash.
-- `ScanReport`: tool_version, mode, repo_head, base, files_scanned, files_skipped, findings, suppressed, exit_code.
+- `ScanReport`: tool_version, mode, repo_head, base, files_indexed, files_scanned, files_skipped, findings, suppressed, exit_code. Scanned plus skipped must equal indexed; `run_scan` raises when it does not, and a skip with a digest counts as skipped.
 - User-owned files: `airlock.toml`, `wasm-manifest.toml`.
 
 ## 6. Exit codes and fail-closed findings [8]

@@ -38,6 +38,7 @@ def to_dict(report: ScanReport) -> dict[str, object]:
         "mode": report.mode.value,
         "repo_head": report.repo_head,
         "base": report.base,
+        "files_indexed": report.files_indexed,
         "files_scanned": report.files_scanned,
         "files_skipped": dict(sorted(report.files_skipped.items())),
         "exit_code": report.exit_code,

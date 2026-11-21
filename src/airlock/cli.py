@@ -43,6 +43,7 @@ from .model import (
     EXIT_INTERNAL,
     EXIT_PASS,
     WASM_ORIGINS,
+    FileEntry,
     Finding,
     Mode,
     ScanContext,
@@ -57,7 +58,7 @@ from .policy import (
     resolve_policy,
     suppress,
 )
-from .report import console, github, jsonout, summary
+from .report import console, github, jsonout, sarif, summary
 from .roles import known_roles
 from .rules import load_role_globs, load_rules
 
@@ -98,6 +99,7 @@ RENDERERS: Mapping[str, Callable[[ScanReport], str]] = {
     "console": console.render,
     "github": github.render,
     "json": jsonout.render,
+    "sarif": sarif.render,
 }
 
 STEP_SUMMARY_ENV = "GITHUB_STEP_SUMMARY"
@@ -188,6 +190,25 @@ def _mode_for(args: argparse.Namespace) -> Mode:
     return Mode.FULL
 
 
+def _file_counts(entries: tuple[FileEntry, ...], skipped: Mapping[str, int]) -> tuple[int, int]:
+    """Indexed and read counts, refusing a report that loses an entry (`ARCHITECTURE.md` 7.8).
+
+    Every indexed entry is either read (a digest and no skip reason) or skipped (a reason, which
+    may still carry the digest the collector computed before it gave up on decoding). An entry in
+    neither bucket is a file no reviewer can see, which is the state this raise prevents rather
+    than reporting a total that quietly disagrees with the index.
+    """
+    indexed = len(entries)
+    scanned = sum(1 for entry in entries if entry.sha256 is not None and entry.skip_reason is None)
+    skipped_total = sum(skipped.values())
+    if scanned + skipped_total != indexed:
+        raise ValueError(
+            "report does not account for every indexed file: "
+            f"{indexed} indexed, {scanned} scanned, {skipped_total} skipped"
+        )
+    return indexed, scanned
+
+
 def run_scan(
     repo: Path,
     mode: Mode,
@@ -243,13 +264,16 @@ def run_scan(
     if keep is not None:
         findings = tuple(item for item in findings if keep(item))
         suppressed = tuple(item for item in suppressed if keep(item))
+    files_skipped = collection.files_skipped
+    files_indexed, files_scanned = _file_counts(collection.entries, files_skipped)
     return ScanReport(
         tool_version=__version__,
         mode=mode,
         repo_head=head,
         base=trusted.base,
-        files_scanned=len(collection.entries),
-        files_skipped=collection.files_skipped,
+        files_indexed=files_indexed,
+        files_scanned=files_scanned,
+        files_skipped=files_skipped,
         findings=findings,
         suppressed=suppressed,
         exit_code=(
