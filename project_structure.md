@@ -70,6 +70,8 @@ airlock/
     check_roadmap_touched.sh       # CI gate: PR must change ROADMAP.md                                      (1.9)
     roadmap_progress.py            # computes and checks the progress table                                  (1.9)
     create_wave_issues.sh          # publishes docs/wave/issues; dry run unless --apply                      (1.14)
+    dev_setup.sh                   # builds .venv, installs the package and the dev group                    (9.69)
+    README.md                      # which script writes where inside the checkout                           (9.69)
 
   docs/
     wave/

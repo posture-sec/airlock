@@ -15,6 +15,8 @@ classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Topic :: Security",
 ]
 
@@ -34,7 +36,9 @@ packages = ["src/airlock"]
 "rules" = "airlock/rules"
 
 [dependency-groups]
-dev = ["pytest>=8", "ruff>=0.6", "mypy>=1.11"]
+# `coverage` is here for local reports only. The floor gate below measures with `python -m trace`
+# from the standard library, so CI's install line (`. pytest ruff mypy`) never needs it.
+dev = ["pytest>=8", "ruff>=0.6", "mypy>=1.11", "coverage>=7"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -59,3 +63,80 @@ select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
 python_version = "3.11"
 files = ["src"]
 strict = true
+
+# Issue #107 / task 9.70: an execution floor per module, measured and asserted by
+# `tests/unit/test_coverage_floor.py` with `python -m trace` from the standard library.
+#
+# Why per module and not in total: `tests/unit/test_fixtures.py` parametrizes every rule over the
+# corpus, so a handful of fixture-heavy modules hold the suite's total in the low nineties while one
+# unexercised branch in `policy.py` moves that total by a fraction of a percent. The security
+# properties live in exactly those branches -- the shipped-default fallback, the refused read, the
+# suppression that does not apply -- so the gate reports a number per module and fails on the
+# module, not on the average.
+#
+# Each floor is the executed-line fraction the module's own unit test file reaches today,
+# `tests/unit/test_<module>.py`, truncated to a whole percent. Truncated, not rounded: rounding
+# runner's 76.71 to 77 would make the gate fail on the measurement that produced it. Measuring one
+# module through one test file is also why a floor can sit below the module's real coverage: the
+# corpus and bypass tests lift a module further, and this table deliberately asks the narrower
+# question of whether the mapped test alone still reaches the number.
+#
+# Measured 2026-11-21 with
+# `python -m trace --count --missing --module pytest tests/unit/test_<module>.py`, on the oldest
+# interpreter `requires-python` allows, because 3.12 and 3.13 carry a larger executable-line table
+# for the same source and therefore report a higher percentage. The fractions at or above which this
+# file was written, and what each module is trusted with:
+#
+#   policy        505/599 = 84.31%   resolves the trusted base ref, loads the manifest and applies
+#                                   suppressions. What the 94 missed rows are: the base-side oversize
+#                                   bootstrap, the duplicate, expired and not-suppressible suppression
+#                                   passes, and the date, `OSError` and control-character refusals.
+#                                   Those are reached from `test_suppression*.py` and the CLI tests
+#                                   rather than from `test_policy.py`, which is what measuring through
+#                                   one mapped file costs. A regression in any of them means the change
+#                                   under scan can approve itself, so this is the entry that decides
+#                                   whether the floor holds.
+#   collector     277/285 = 97.19%   every git read and the oversize, symlink and unreadable
+#                                   refusals. A line that stops running here is a file skipped
+#                                   without a finding.
+#   rules         191/206 = 92.72%   rule loading, the engine pattern pass and `cap_findings`.
+#   runner         56/73 = 76.71%   orchestration, engine containment and `detector-error`. Lowest
+#                                   floor: `test_runner.py` drives a small fake registry, so the
+#                                   per-detector branches are not reached. Raising it is follow-up
+#                                   work, and this line says so rather than hiding it.
+#   fingerprint    85/87 = 97.70%   occurrence numbering and the digest that makes report order
+#                                   stable, so a finding cannot be suppressed by reordering.
+#   model         270/281 = 96.09%   the `FileEntry`, `Finding` and `Policy` invariants the rest of
+#                                   the scanner reads as fact.
+#   roles          92/94 = 97.87%   content magic, then the `rules/roles.toml` globs, then the
+#                                   extension fallback. The classification every role-scoped rule
+#                                   reads, and the place that decides `*` cannot cross `/` so one
+#                                   wildcard line cannot switch an allowlist off.
+#   strkey         30/32 = 93.75%   the strkey decode and CRC16-XModem check `stellar_seed` reports
+#                                   through: a seed candidate is only a finding when the checksum
+#                                   validates, so a row that stops running here either accepts a
+#                                   malformed candidate or refuses a real key.
+#
+# Two shipped modules carry no entry on purpose. `cli.py` is omitted by `[tool.coverage.run]` below,
+# because it is the process boundary that turns exceptions into exit codes. `__init__` and `__main__`
+# are the two names task 9.67 (`tests/unit/test_module_coverage.py`) already exempts from the
+# one-test-module-per-module convention: `__init__` is the package body every other measurement
+# executes as an import side effect, and `__main__` runs only inside a child process, which trace
+# does not follow.
+[tool.airlock.coverage.floors]
+policy = 84
+collector = 97
+rules = 92
+runner = 76
+fingerprint = 97
+model = 96
+roles = 97
+strkey = 93
+
+# What `coverage` itself reads when a contributor runs it for an HTML report. The floor gate reads
+# `source` and `omit` from here rather than repeating them, so the printed report and the asserted
+# floor cannot disagree about which files count.
+[tool.coverage.run]
+source = ["airlock"]
+omit = ["*/airlock/cli.py"]
+
