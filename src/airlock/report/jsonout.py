@@ -15,6 +15,8 @@ import json
 
 from ..model import Finding, ScanReport
 
+SCHEMA_VERSION: int = 1
+
 
 def finding_to_dict(finding: Finding) -> dict[str, object]:
     return {
@@ -34,6 +36,7 @@ def finding_to_dict(finding: Finding) -> dict[str, object]:
 
 def to_dict(report: ScanReport) -> dict[str, object]:
     return {
+        "schema_version": SCHEMA_VERSION,
         "tool_version": report.tool_version,
         "mode": report.mode.value,
         "repo_head": report.repo_head,

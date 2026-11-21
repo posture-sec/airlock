@@ -4,6 +4,9 @@ Formula (`ARCHITECTURE.md` 7.3):
 
     sha256(rule_id \\0 path \\0 normalized_evidence \\0 occurrence)
 
+When any field contains a NUL the four fields are length-prefixed behind a leading NUL
+marker instead, because a `\0` join cannot tell an embedded NUL from a separator.
+
 Line numbers stay out, so an edit above a suppressed line does not invalidate the
 suppression. `occurrence` is the zero-based index of identical evidence, which is what
 makes a second copy of a suppressed line a new, unsuppressed finding (B5). When an earlier
@@ -21,6 +24,11 @@ from dataclasses import dataclass
 from .model import FINGERPRINT_PREFIX, MAX_EVIDENCE_CHARS, Finding, Severity
 
 _WS_RE = re.compile(r"\s+")
+
+# A NUL-free payload starts with `rule_id`, which is kebab-case and therefore begins with a
+# letter. A leading NUL can only be this marker, so the two encodings never collide (7.3).
+_LENGTH_PREFIX_MARKER = b"\x00"
+_FIELD_LENGTH_BYTES = 8
 
 # Grouping key for occurrence counting. Scoped to a rule as well as a path and evidence, so
 # suppressing one rule's finding cannot silently suppress a different rule on the same line.
@@ -44,9 +52,25 @@ def truncate_evidence(text: str | None) -> str | None:
     return cleaned[:MAX_EVIDENCE_CHARS] + "..."
 
 
+def _payload(rule_id: str, path: str, evidence_key: str, occurrence: int) -> bytes:
+    """The bytes that are hashed. NUL-free fields keep the published `\0` join.
+
+    Evidence is attacker-controlled and can contain a NUL, which would blur the boundary
+    between two fields. When any field contains one, every field is length-prefixed behind
+    a marker byte instead, so the encoding stays injective. A NUL-free quadruple is byte
+    identical to the original formula, so existing suppressions keep matching.
+    """
+    fields = (rule_id, path, evidence_key, str(occurrence))
+    encoded = [field.encode("utf-8", errors="replace") for field in fields]
+    if not any(b"\x00" in field for field in encoded):
+        return b"\x00".join(encoded)
+    return _LENGTH_PREFIX_MARKER + b"".join(
+        len(field).to_bytes(_FIELD_LENGTH_BYTES, "big") + field for field in encoded
+    )
+
+
 def fingerprint(rule_id: str, path: str, evidence_key: str, occurrence: int) -> str:
-    payload = "\0".join((rule_id, path, evidence_key, str(occurrence)))
-    digest = hashlib.sha256(payload.encode("utf-8", errors="replace")).hexdigest()
+    digest = hashlib.sha256(_payload(rule_id, path, evidence_key, occurrence)).hexdigest()
     return FINGERPRINT_PREFIX + digest
 
 

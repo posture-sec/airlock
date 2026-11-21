@@ -31,7 +31,7 @@ from dataclasses import dataclass, replace
 from datetime import UTC, date, datetime
 from pathlib import Path
 
-from .collector import git_text
+from .collector import git_status, git_text
 from .fingerprint import PendingFinding, number_occurrences, truncate_evidence
 from .model import (
     BOOTSTRAP_POLICY,
@@ -196,14 +196,22 @@ def _trusted_ref(
 
 
 def _unreachable_reason(repo_root: Path, before: str, head: str) -> str | None:
-    """Why `before` cannot serve as the base, or None when it can."""
+    """Why `before` cannot serve as the base, or None when it can.
+
+    Only a genuine non-ancestor verdict (git exit 1, no error output) is a rewrite. Any other
+    failure, such as a shallow checkout missing `before` or a missing object, raises
+    `ValueError` naming the command, so the CLI exits 2 instead of naming an incident that
+    did not happen.
+    """
     if not _is_sha(before):
         return f"`before` is not a commit SHA: {before[:80]!r}"
-    try:
-        git_text(repo_root, "merge-base", "--is-ancestor", before, head)
-    except ValueError as exc:
-        return str(exc)
-    return None
+    status, error = git_status(repo_root, "merge-base", "--is-ancestor", before, head)
+    if status == 0:
+        return None
+    if status == 1 and not error:
+        return f"`before` {_short(before)} is not an ancestor of {_short(head)}"
+    command = f"git merge-base --is-ancestor {_short(before)} {_short(head)}"
+    raise ValueError(f"{command} failed with exit {status}: {error or 'no error output'}")
 
 
 def _is_commit(repo_root: Path, sha: str) -> bool:

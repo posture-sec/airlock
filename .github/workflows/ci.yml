@@ -1,4 +1,4 @@
-# Tests, lint, types and the self-scan (task 1.5).
+# Tests, lint, types and the self-scan (task 1.5, matrix added by 9.31).
 #
 # Both actions are pinned by commit SHA, with the tag that SHA was resolved from in the comment.
 # A SHA pin is only honest if somebody reads the diff before moving it, and the SHA in a comment
@@ -16,8 +16,16 @@ permissions:
   contents: read
 
 jobs:
+  # `pyproject.toml` declares `requires-python = ">=3.11"`, which is a promise about 3.12 and 3.13
+  # too, so the suite runs on each of the three rather than only on the floor.
   checks:
     runs-on: ubuntu-latest
+    strategy:
+      # With the default `fail-fast: true` a break that only shows on 3.13 cancels the 3.11 run,
+      # and 3.11 is the job that answers whether the declared floor still holds.
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -28,7 +36,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python-version }}
 
       - name: Install the package and the dev tools
         run: |
@@ -45,6 +53,25 @@ jobs:
 
       - name: Types
         run: mypy src
+
+  # Its own job, and its own interpreter, because this output is quoted when the scanner's own tree
+  # is discussed: three copies of it, one per interpreter, make that quote ambiguous. It pins the
+  # declared floor so the quote moves only when somebody decides to.
+  self-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Same reason as above: the rules the scan reads live in the tree, and the roadmap gate
+          # needs the base history to know what this branch changed.
+          fetch-depth: 0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.11"
+
+      - name: Install the package
+        run: |
+          python -m pip install --quiet .
 
       # The installed console script is the same one a consumer gets, so this step is also the
       # check that the wheel carries its rule data (5.7). It must exit 0: a HIGH finding in this

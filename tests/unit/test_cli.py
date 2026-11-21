@@ -256,12 +256,12 @@ reason      = "trust me"
     ) -> None:
         first = seed(repo)
         write(repo, "postcss.config.mjs", CLEAN_CONFIG + "// bump the version pin\n")
-        commit(repo)
+        discarded = commit(repo)
         git(repo, "reset", "--hard", first)
         write(repo, "postcss.config.mjs", PAYLOAD)
         commit(repo)
 
-        code, out = scan(repo, "--event", "push", "--before", "a" * 40, capsys=capsys)
+        code, out = scan(repo, "--event", "push", "--before", discarded, capsys=capsys)
 
         assert code == EXIT_FINDINGS
         assert "history-rewritten" in out

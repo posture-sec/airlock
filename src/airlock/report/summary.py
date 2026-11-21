@@ -123,6 +123,24 @@ def evidence_blocks(findings: tuple[Finding, ...]) -> list[str]:
     return lines
 
 
+def suppressed_section(report: ScanReport) -> list[str]:
+    """The suppressed findings table or empty declaration."""
+    if not report.suppressed:
+        return ["No finding was suppressed."]
+    rows = [
+        f"| {inline(finding.rule_id)} | {location(finding)} | {inline(finding.fingerprint)}"
+        f" | {inline(finding.suppressed_by or '')} |"
+        for finding in report.suppressed
+    ]
+    return [
+        "These are suppressed and not findings.",
+        "",
+        "| Rule | Location | Fingerprint | Reason |",
+        "|---|---|---|---|",
+        *rows,
+    ]
+
+
 def _document(
     report: ScanReport,
     rows: list[str],
@@ -158,6 +176,13 @@ def _document(
         ]
     lines += [
         "",
+        "## Suppressed findings",
+        "",
+        *suppressed_section(report),
+    ]
+    if lines[-1] != "":
+        lines.append("")
+    lines += [
         f"Mode `{inline(report.mode.value)}` · exit {report.exit_code}"
         f" · airlock {inline(report.tool_version)}",
     ]

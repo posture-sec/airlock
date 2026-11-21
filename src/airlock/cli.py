@@ -27,6 +27,7 @@ detector's question and reimplementing it here would be a second answer to it.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import os
 import sys
 from collections.abc import Callable, Mapping
@@ -359,9 +360,26 @@ def _emit(report: ScanReport, args: argparse.Namespace) -> int:
     if args.output:
         Path(args.output).write_text(text, encoding="utf-8")
     else:
-        sys.stdout.write(text)
+        _write_stdout(text)
     _write_step_summary(report)
     return report.exit_code
+
+
+def _write_stdout(text: str) -> None:
+    """Write the report to stdout and flush it here, where the exit code is still in scope.
+
+    A reader that stops early (`airlock scan . | head -1`, a pager quit) closes the pipe, and the
+    write raises `BrokenPipeError` for it. The scan found what it found, so that is not the
+    internal error the broad handler in `main` would report as exit 3 (`ARCHITECTURE.md` 8).
+
+    The flush is the part that makes the catch reachable: stdout into a pipe is block-buffered, so a
+    short report would otherwise sit in the buffer and raise during interpreter shutdown instead,
+    past every handler in this process. That is how a closed pipe came to exit 120 with a traceback
+    on stderr rather than with the verdict.
+    """
+    with contextlib.suppress(BrokenPipeError):
+        sys.stdout.write(text)
+        sys.stdout.flush()
 
 
 def _write_step_summary(report: ScanReport) -> None:

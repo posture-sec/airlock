@@ -1,6 +1,6 @@
 # ROADMAP: Airlock
 
-Last updated: 2026-11-21 18:40 UTC
+Last updated: 2026-11-21 09:35 UTC
 
 Roadmap version: 1
 
@@ -43,7 +43,7 @@ The repository is 100% ready when every task in Phases 0 to 8 is done and every 
 | 6 | Stellar detectors | 0 | 5 | 0% |
 | 7 | Hardening and edge cases | 4 | 13 | 31% |
 | 8 | Release v0.2.0 and community | 2 | 6 | 33% |
-| 9 (backlog) | Backlog | 37 | 50 | 74% |
+| 9 (backlog) | Backlog | 49 | 62 | 79% |
 | **Phases 0 to 8** | **Readiness total** | **46** | **95** | **48%** |
 | Gates | G1 to G10 | 0 | 10 | 0% |
 <!-- PROGRESS:END -->
@@ -324,7 +324,19 @@ families.
 - [x] **9.47** Report a symlink in a sensitive role as `skipped-symlink` HIGH instead of INFO, keeping INFO for ordinary paths; the target is never read (#9).
 - [x] **9.48** Report a second valid suppression entry with the same rule, path and fingerprint as `suppression-invalid`, naming both positions and which one is consulted first; the first entry still decides (#13).
 - [x] **9.49** Build the `detector-error` message from scanner text, the detector module and the exception type only, moving the exception text to evidence with C0 controls escaped and newlines flattened (#15).
-- [x] **9.50** Bound the step summary so a large scan cannot overflow it: `SUMMARY_BUDGET_BYTES` sits below the 1 MiB upload ceiling, evidence is cut before rows, and the document states how many rows and evidence blocks it withheld while the counts and mode/exit lines survive; `tests/unit/test_summary_size.py` fails before the change with a body over the ceiling (#67).
+- [x] **9.50** Stop suppression note promising JSON output that was not written, naming `--format json` or reporting count alone (#64).
+- [x] **9.51** List suppressed fingerprints and reasons in the step summary after HIGH findings, escaping markup with `inline` (#66).
+- [x] **9.52** Version the JSON report (`SCHEMA_VERSION = 1`) and validate output and golden fixtures against a checked-in JSON schema with standard-library validator (#69).
+- [x] **9.53** Run the pr-mode trusted-base path against a two-commit fixture and add `.github/workflows/pr-mode.yml` (#77).
+- [x] **9.54** Make the fingerprint payload self-delimiting: a NUL-free quadruple keeps the published `\0` join, and a field containing a NUL switches all four to length-prefixed fields behind a leading NUL marker (#19).
+- [x] **9.55** In push mode, report `history-rewritten` only for a genuine non-ancestor verdict; any other `merge-base --is-ancestor` failure raises `ValueError` naming the command so the CLI exits 2 (#12).
+- [x] **9.56** Contain the engine pass per entry: an exception from `apply_patterns` or `cap_findings` keeps earlier findings and adds a HIGH `detector-error` naming the entry and stage, so the scan still writes a report (#14).
+- [x] **9.57** Give `_GLOB_CHARS` the matcher's grammar (`*` and `?` only), so a literal bracketed suppression path such as `app/[id].tsx` loads while wildcards stay refused (#22).
+- [x] **9.58** A closed stdout keeps the scan's verdict: `_emit` writes the report through a helper that flushes inside a `BrokenPipeError` guard, and `__main__` points descriptor 1 at the null device when the flush at interpreter start-up finds the pipe gone. S. Deps: 1.5. Done when: `airlock scan . | head -1` exits with the finding's code and prints no traceback, and a test that closes the read end of the pipe before the write covers both verdicts (#75). (done 2026-11-21 07:42: `tests/unit/test_broken_pipe.py`, seven cases over scratch repositories: a tree with a HIGH exits 1 with the report intact, a clean tree exits 0, the same under `PYTHONUNBUFFERED=1` which is the write site rather than the start-up flush, `$GITHUB_STEP_SUMMARY` still gets its block, `--output` is unaffected, `--format json` keeps its exit code, and a reader that keeps the pipe open still receives the whole report. Against the two files before the fix the same suite is 5 failed and 2 passed, and the failing assertion reads `assert 120 == 1`, which is the symptom the issue reports.)
+- [x] **9.59** CI runs the suite on every interpreter the package claims: the `checks` job takes a `python-version` matrix of 3.11, 3.12 and 3.13 with `fail-fast: false`, and the self-scan moves to its own job pinned to the declared floor so the dogfood number quoted for this repository stays one number. S. Deps: 1.5. Done when: the workflow names all three versions with `fail-fast: false`, and a test reads the workflow and fails with the file and the line if the matrix goes missing (#76). (done 2026-11-21 07:42: `tests/unit/test_workflow_matrix.py`, eighteen cases. It parses the YAML with a line scanner of its own because PyYAML is not a dependency and `AGENTS.md` 5 forbids adding one, and it reads the single-version workflow this replaces out of `b323de5` by commit so the guard keeps the record of what it changed; that object stays reachable because both jobs check out with `fetch-depth: 0`, which is one of the cases. Against the workflow before the change the file is 8 failed and 10 passed.)
+- [x] **9.60** The fixture builders are held to what they impose: every module under `tests/fixtures/` goes through the shipped rules as role `source`, so a trigger pasted into a builder fails the suite instead of waiting for the dogfood scan to notice among its other findings. S. Deps: 3.4. Done when: the guard covers every builder, a seed-shaped literal in one of them is reported by path and line, and no committed fragment fires when read on its own (#85). (done 2026-11-21 07:42: `tests/unit/test_fixture_hygiene.py`, seven cases. Rule data comes straight from `airlock.rules` and `airlock.detectors`, and the fragment constants are read with `ast`, both because `AGENTS.md` 4 forbids importing a builder before its text has been scanned. The litter proof does not touch the tree: `scan_builders` takes the reader, so one case feeds a checksum-valid 56-character seed through a mocked import and asserts a failure naming the builder, and another feeds an ordinary string and asserts pass.)
+- [x] **9.61** Hold the test suite execution time inside a measured budget: each of the three matrix jobs asserts `suite_seconds < 45.0` and writes the recorded duration, with a unit test that pins the budget and checks the timing collector (#89). (done 2026-11-21 07:42: `tests/unit/test_suite_budget.py`, seven cases. The budget is read out of `tests/conftest.py`, which hooks `pytest_terminal_summary` to enforce the ceiling.)
+- [x] **9.62** Bound the step summary so a large scan cannot overflow it: `SUMMARY_BUDGET_BYTES` sits below the 1 MiB upload ceiling, evidence is cut before rows, and the document states how many rows and evidence blocks it withheld while the counts and mode/exit lines survive; `tests/unit/test_summary_size.py` fails before the change with a body over the ceiling (#67).
 
 ## 6. Dependency map (critical path)
 
@@ -369,6 +381,10 @@ Newest first. One row per merged change.
 
 | Date (UTC) | Change | Tasks |
 |---|---|---|
+| 2026-11-21 09:35 | Close #67. Bound step summary under SUMMARY_BUDGET_BYTES (900KB) to prevent GitHub 1 MiB drop; prune evidence then rows while keeping counts and mode lines. | 9.62 |
+| 2026-11-21 09:30 | Close #75, #76, #85 and #89. Guard against BrokenPipeError on closed stdout; add 3.11/3.12/3.13 matrix in CI; enforce fixture builder hygiene; enforce 45s suite budget hook. | 9.58, 9.59, 9.60, 9.61 |
+| 2026-11-21 09:20 | Close #12, #14, #19 and #22 in one pull request. `fingerprint._payload` keeps the published `\0` join byte for byte when no field contains a NUL, and switches all four fields to 8-byte length prefixes behind a leading NUL marker when one does; the marker cannot begin a normal payload because `rule_id` starts with a letter, and the pinned NUL-free digest is unchanged so stored suppressions keep matching. Push mode reads `merge-base --is-ancestor` through the new `collector.git_status` and treats only exit 1 with no error output as `history-rewritten`; a missing object, shallow checkout or timeout raises `ValueError` naming the command and git's error, which the CLI maps to exit 2. The engine pass now contains each stage per entry: a raise becomes a HIGH `detector-error` naming the entry and stage and earlier findings stay in the report. `_GLOB_CHARS` drops `[` to match `roles._segment_pattern`, so a suppression for a literal `app/[id].tsx` loads while `*` and `?` are still refused. New modules: `test_fingerprint_field_join.py`, `test_policy_trusted_ref_errors.py`, `test_runner_engine_containment.py`, `test_model_glob_grammar.py`; `ARCHITECTURE.md` 7.3 states the payload rule. | 9.54, 9.55, 9.56, 9.57 |
+| 2026-11-20 19:15 | Close #64, #66, #69 and #77. Clean up suppression note wording; list suppressed items in step summary; version and validate JSON report schema; add PR mode fixture and workflow. | 9.50, 9.51, 9.52, 9.53 |
 | 2026-11-20 18:30 | Close #8, #9, #13 and #15. Interpolate HEAD_BYTES in skipped-oversize; report sensitive symlink at HIGH; report duplicate suppression as suppression-invalid; sanitize detector-error message and controls. | 9.46, 9.47, 9.48, 9.49 |
 | 2026-11-20 18:00 | Close #21, #25, #26 and #27. Enforce FileEntry mutual exclusivity; validate PE structure and emit content-magic-role; cover strkey vectors; hold engine boundary with AST test. | 9.42, 9.43, 9.44, 9.45 |
 | 2026-11-20 16:28 | Close #73, #74, #83 and #84. Treat GITHUB_STEP_SUMMARY write failures as warnings; pin python -m and entry point behavior; enforce corpus registry consistency and fixture distinctness. | 9.38, 9.39, 9.40, 9.41 |

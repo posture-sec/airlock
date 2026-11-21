@@ -82,21 +82,38 @@ class Collection:
         return counts
 
 
+def _run_git(
+    repo_root: Path, args: tuple[str, ...], timeout: int
+) -> subprocess.CompletedProcess[bytes]:
+    argv = ["git", "-C", str(repo_root), *args]
+    try:
+        return subprocess.run(argv, capture_output=True, timeout=timeout, check=False)
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise ValueError(f"git failed to run: {exc}") from exc
+
+
 def git_bytes(repo_root: Path, *args: str, timeout: int = 120) -> bytes:
     """Run one git command in the scanned repo and return raw stdout. Never uses a shell.
 
     Every git call in this module goes through here, so a timeout or a missing binary fails
     the same way whoever asked git. The CLI turns that `ValueError` into exit code 2.
     """
-    argv = ["git", "-C", str(repo_root), *args]
-    try:
-        result = subprocess.run(argv, capture_output=True, timeout=timeout, check=False)
-    except (OSError, subprocess.SubprocessError) as exc:
-        raise ValueError(f"git failed to run: {exc}") from exc
+    result = _run_git(repo_root, args, timeout)
     if result.returncode != 0:
         detail = result.stderr.decode("utf-8", errors="replace").strip()
         raise ValueError(detail or f"git exited with code {result.returncode}")
     return result.stdout
+
+
+def git_status(repo_root: Path, *args: str, timeout: int = 120) -> tuple[int, str]:
+    """Run one git command and return `(exit status, stderr)` without judging the status.
+
+    For callers that read the exit status as the answer, such as `merge-base --is-ancestor`,
+    where 1 means "no" rather than "the command failed". A command that could not run still
+    raises `ValueError`.
+    """
+    result = _run_git(repo_root, args, timeout)
+    return result.returncode, result.stderr.decode("utf-8", errors="replace").strip()
 
 
 def git_text(repo_root: Path, *args: str) -> str:

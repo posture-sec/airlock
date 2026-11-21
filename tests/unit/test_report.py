@@ -291,7 +291,7 @@ class TestGithubAnnotations:
         text = github.render(report(suppressed=(finding(),)))
         expected = (
             "::notice title=airlock::1 finding(s) are hidden by the trusted airlock.toml; "
-            "the JSON output names each one and its reason.\n"
+            "--format json names each one and its reason.\n"
         )
 
         assert text == expected

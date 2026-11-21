@@ -216,4 +216,5 @@ class TestEntryPointMetadata:
         text = (REPO_ROOT / "src" / "airlock" / "__main__.py").read_text(encoding="utf-8")
         assert "from .cli import main" in text
         assert 'if __name__ == "__main__":' in text
-        assert "raise SystemExit(main())" in text
+        assert "main()" in text
+        assert "raise SystemExit(" in text

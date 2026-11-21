@@ -68,7 +68,9 @@ _HEX64_RE = re.compile(r"\A[0-9a-f]{64}\Z")
 # Leading letter, no trailing or doubled dash: rule ids are stable once shipped and an
 # ambiguous id cannot be retired cleanly (project_structure.md 5).
 _KEBAB_RE = re.compile(r"\A[a-z](?:[a-z0-9]*(?:-[a-z0-9]+)*)?\Z")
-_GLOB_CHARS = frozenset("*?[")
+# The matcher (`roles._segment_pattern`) treats `*` and `?` as wildcards and escapes
+# everything else, brackets included, so these two are the whole glob grammar.
+_GLOB_CHARS = frozenset("*?")
 
 
 class Severity(IntEnum):
