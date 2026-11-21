@@ -346,7 +346,7 @@ def test_no_published_file_carries_a_rule_match() -> None:
         text = path.read_text(encoding="utf-8")
         entry = FileEntry(
             path=path.relative_to(REPO_ROOT).as_posix(),
-            sha256=None,
+            sha256="a" * 64,
             roles=("source",),
             text=text,
         )

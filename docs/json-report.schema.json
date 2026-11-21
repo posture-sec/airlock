@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AirlockScanReport",
+  "description": "Schema for Airlock JSON scan reports.",
+  "type": "object",
+  "required": [
+    "base",
+    "exit_code",
+    "files_indexed",
+    "files_scanned",
+    "files_skipped",
+    "findings",
+    "mode",
+    "repo_head",
+    "schema_version",
+    "suppressed",
+    "tool_version"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "base": {
+      "type": ["string", "null"]
+    },
+    "exit_code": {
+      "type": "integer",
+      "enum": [0, 1, 2, 3]
+    },
+    "files_indexed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "files_scanned": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "files_skipped": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/finding"
+      }
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["pr", "push", "full"]
+    },
+    "repo_head": {
+      "type": "string"
+    },
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "suppressed": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/finding"
+      }
+    },
+    "tool_version": {
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "required": [
+        "evidence",
+        "fingerprint",
+        "line",
+        "message",
+        "occurrence",
+        "path",
+        "roles",
+        "rule_id",
+        "severity",
+        "suppressible",
+        "suppressed_by"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "evidence": {
+          "type": ["string", "null"]
+        },
+        "fingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "message": {
+          "type": "string"
+        },
+        "occurrence": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "path": {
+          "type": "string"
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rule_id": {
+          "type": "string"
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["high", "warn", "info"]
+        },
+        "suppressible": {
+          "type": "boolean"
+        },
+        "suppressed_by": {
+          "type": ["string", "null"]
+        }
+      }
+    }
+  }
+}

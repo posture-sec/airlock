@@ -21,6 +21,8 @@ from ..model import Finding, ScanReport, Severity
 
 #: The summary is size-limited by GitHub, so evidence is shorter here than in the JSON.
 SUMMARY_EVIDENCE_CHARS = 200
+SUMMARY_EVIDENCE_MARKER = " ..."
+TRUNCATION_MARKER = SUMMARY_EVIDENCE_MARKER
 
 #: `#` and `-` are deliberately absent: they only take effect at the start of a line, and no
 #: attacker-controlled text is ever placed there (rows start with a pipe, bullets with a dash).
@@ -45,7 +47,8 @@ def truncated(evidence: str | None) -> str:
     cleaned = flatten(evidence)
     if len(cleaned) <= SUMMARY_EVIDENCE_CHARS:
         return cleaned
-    return cleaned[:SUMMARY_EVIDENCE_CHARS] + " ..."
+    prefix_len = max(0, SUMMARY_EVIDENCE_CHARS - len(SUMMARY_EVIDENCE_MARKER))
+    return cleaned[:prefix_len] + SUMMARY_EVIDENCE_MARKER
 
 
 def fence_for(texts: Iterable[str]) -> str:
@@ -110,10 +113,28 @@ def evidence_blocks(findings: tuple[Finding, ...]) -> list[str]:
     return lines
 
 
+def suppressed_section(report: ScanReport) -> list[str]:
+    """The suppressed findings table or empty declaration."""
+    if not report.suppressed:
+        return ["No finding was suppressed."]
+    rows = [
+        f"| {inline(finding.rule_id)} | {location(finding)} | {inline(finding.fingerprint)}"
+        f" | {inline(finding.suppressed_by or '')} |"
+        for finding in report.suppressed
+    ]
+    return [
+        "These are suppressed and not findings.",
+        "",
+        "| Rule | Location | Fingerprint | Reason |",
+        "|---|---|---|---|",
+        *rows,
+    ]
+
+
 def render(report: ScanReport) -> str:
     """The whole summary as one Markdown document."""
     highs = tuple(finding for finding in report.findings if finding.severity is Severity.HIGH)
-    lines = [
+    lines: list[str] = [
         "# Airlock",
         "",
         f"{count_phrase(report)} · {report.files_scanned} file(s) scanned",
@@ -129,8 +150,16 @@ def render(report: ScanReport) -> str:
         *finding_rows(highs),
         *evidence_blocks(highs),
     ]
+    if lines[-1] != "":
+        lines.append("")
     lines += [
+        "## Suppressed findings",
         "",
+        *suppressed_section(report),
+    ]
+    if lines[-1] != "":
+        lines.append("")
+    lines += [
         f"Mode `{inline(report.mode.value)}` · exit {report.exit_code}"
         f" · airlock {inline(report.tool_version)}",
     ]

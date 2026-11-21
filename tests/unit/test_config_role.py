@@ -39,7 +39,7 @@ def make_entry(
     entry_roles: tuple[str, ...] | None = None,
 ) -> FileEntry:
     roles_ = entry_roles if entry_roles is not None else (roles.TOOLING_CONFIG_ROLE, "source")
-    return FileEntry(path=path, sha256=None, roles=roles_, text=text)
+    return FileEntry(path=path, sha256="a" * 64, roles=roles_, text=text)
 
 
 def make_context(entries: list[FileEntry], **policy: Any) -> ScanContext:
@@ -74,7 +74,10 @@ class TestRoleGating:
 
     def test_a_file_the_collector_could_not_read_is_left_to_the_collector(self) -> None:
         unreadable = FileEntry(
-            path="next.config.js", sha256=None, roles=(roles.TOOLING_CONFIG_ROLE,)
+            path="next.config.js",
+            sha256=None,
+            roles=(roles.TOOLING_CONFIG_ROLE,),
+            skip_reason="unreadable",
         )
         assert run_ids([unreadable]) == []
 

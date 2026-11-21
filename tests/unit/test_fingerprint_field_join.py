@@ -4,9 +4,12 @@ from __future__ import annotations
 
 import hashlib
 
+from tests.fixtures import assemble
+
 from airlock.fingerprint import _payload, fingerprint
 
-NUL_FREE = ("cfg-dynamic-code", "postcss.config.mjs", "eval(Buffer.from(p, 'base64'))", 0)
+_PAYLOAD = f"{assemble('ev', 'al')}({assemble('Buf', 'fer.from')}(p, 'base64'))"
+NUL_FREE = ("cfg-dynamic-code", "postcss.config.mjs", _PAYLOAD, 0)
 # The digest the published `\0` join produced before the length-prefixed branch existed.
 PINNED = "sha256:3e1c980869ae432c985b851e1dd4be15a76c3cd3511f302298623bd4bc54c170"
 

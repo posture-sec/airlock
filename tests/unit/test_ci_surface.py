@@ -134,7 +134,7 @@ def roles_of(path: str) -> tuple[str, ...]:
 
 
 def entry(path: str, text: str) -> FileEntry:
-    return FileEntry(path=path, sha256=None, roles=roles_of(path), text=text)
+    return FileEntry(path=path, sha256="a" * 64, roles=roles_of(path), text=text)
 
 
 def context(*files: tuple[str, str]) -> ScanContext:

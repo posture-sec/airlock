@@ -115,7 +115,7 @@ Removed since v0.1 of this document: `jsmask.py`, `wasmparse.py`, `detectors/dep
 - Reads each file once: size, first 4096 bytes and (lazily) the full bytes and SHA-256.
 - Checks that the bytes read match the file's recorded size on both the head-only read path and the full-read path. If the file shrinks or grows between the size check and the read, it yields `skipped-unreadable` (HIGH) without producing a hash or extracting text.
 - Decoding: honor a UTF-8 or UTF-16 BOM; otherwise decode UTF-8 strictly. Undecodable text yields `non-utf8-text` (HIGH in sensitive roles, WARN elsewhere). A NUL byte after BOM handling yields `nul-in-text`.
-- Never follows symlinks; a symlink is recorded as `skipped-symlink` (INFO) and its target path is not read.
+- Never follows symlinks; a symlink is recorded as `skipped-symlink` and its target path is not read. The severity is HIGH for the roles in `SENSITIVE_ROLES`, because a link in that set is an unread file that would have run, and INFO otherwise.
 - Enforces `max_file_bytes` (default 5,000,000). Oversized files yield `skipped-oversize`: WARN generally, HIGH for the roles in `SENSITIVE_ROLES` (`tooling-config`, `editor-autorun`, `workflow`, `package-manifest`, `install-hook`).
 - Enforces `line_cap` (default 20,000 characters). Lines over the cap are not passed to regex rules and yield `cfg-long-line`.
 - Startup checks: Python 3.11 or newer, `git` on PATH, repository readable (including the git `safe.directory` case). Failure exits 2 with a plain message.
@@ -124,7 +124,7 @@ Removed since v0.1 of this document: `jsmask.py`, `wasmparse.py`, `detectors/dep
 
 A role is a label detectors use to decide what to inspect. Resolution order:
 
-1. Content magic: `\0asm` gives `wasm`; ELF, PE and Mach-O magics give `native-binary`. Applies regardless of extension.
+1. Content magic: `\0asm` gives `wasm`; ELF and Mach-O magics give `native-binary`, and so does `MZ` only when the DOS header's little-endian `e_lfanew` at offset `0x3C` points, inside the bytes already read, at a `PE\0\0` signature. A file starting with `MZ` that fails that check falls through to the globs and extension and is scanned as text. Applies regardless of extension. Every magic role produces a non-suppressible INFO `content-magic-role` finding naming the role and path.
 2. Glob rules from `rules/roles.toml`. No per-repo role overrides in v0.1.
 3. Fallback: `source`, `doc` or `other` by extension.
 
@@ -134,7 +134,7 @@ A file may have several roles. Globs use a small internal matcher where `**` spa
 
 A detector is a function `run(ctx) -> Iterable[Finding]` registered in a plain list. (An earlier draft used a Protocol class and a registry object; a list of functions is enough.) `ScanContext` exposes exactly four things: the collected file entries with their roles, the trusted policy, the trusted manifest and the loaded rule data. It does not expose the trust model itself — see 7.9.
 
-Every call is wrapped: an exception becomes a HIGH `detector-error` and the remaining detectors still run. Findings a detector yielded before it raised are kept, so one failure on the tenth file costs the scan that file's coverage and nothing more. Third-party detector plugins are not supported, because loading external code would defeat the trust model.
+Every call is wrapped: an exception becomes a HIGH `detector-error` and the remaining detectors still run. Findings a detector yielded before it raised are kept, so one failure on the tenth file costs the scan that file's coverage and nothing more. The message is built only from scanner-written text, the in-tree detector module name and the exception type. The exception's own text moves to the evidence, with C0 control characters escaped visibly and newlines flattened, so a path or line fragment quoted by the exception cannot forge an annotation or hide the finding. Third-party detector plugins are not supported, because loading external code would defeat the trust model.
 
 The registry also names the valid `builtin:<name>` targets (`DETECTOR_NAMES`), so the rule loader rejects a rule pointing at a detector that does not exist. Two detectors are registered now: `config_role` and `wasm_manifest`.
 
@@ -350,6 +350,7 @@ Rules for suppressions:
 - `expires` is optional. 30 days before expiry a `suppression-expiring` WARN appears; after expiry only that finding returns, so builds do not turn red for a reason unrelated to a change (B10).
 - Entries for `suppressible = false` rules never apply and emit `suppression-invalid` (HIGH). The same holds for an entry naming a rule that is not loaded in this build, or a scanner-state rule id. State membership is checked before the rule lookup, including when a loaded rule disagrees. State findings always report `suppressible = false`; both the shipped `cfg-long-line` rule and its engine fallback agree. Validity is decided before matching, so a mistaken entry cannot hide a finding while the report complains about it.
 - An entry is checked against the rule data rather than against the scan's findings, so a rule that was renamed or made non-suppressible is reported even on a scan where the entry matched nothing.
+- A second valid entry with the same `rule`, `path` and `fingerprint` is a duplicate and emits `suppression-invalid` (HIGH). The report names both entry positions and says which one is consulted first. The first entry keeps deciding, including when it has expired, so the duplicate neither suppresses anything nor changes the covered finding's `suppressed_by`.
 - Unknown top-level keys emit `policy-unknown-key` (WARN); a missing or unsupported `version` exits 2.
 - The base copy is held to the same ceiling as the working tree. A blob over `MAX_CONFIG_BYTES` is refused before it is decoded, comes back as `skipped-unreadable` (HIGH) with the shipped defaults in its place, and the change's copy is not read, so no `policy-changed` is claimed for a comparison that never happened.
 
@@ -391,12 +392,17 @@ class ScanReport:
     mode: Mode
     repo_head: str
     base: str | None
-    files_scanned: int
-    files_skipped: dict[str, int]     # reason -> count
+    files_indexed: int               # every entry the index lists
+    files_scanned: int               # a digest and no skip reason
+    files_skipped: dict[str, int]    # reason -> count
     findings: list[Finding]
     suppressed: list[Finding]
     exit_code: int
 ```
+
+The three file counts are a partition, not a summary. `files_indexed` is `len(collection.entries)`, one entry per path `git ls-files --stage` returns after the collector folds a conflict's staged versions into one entry. An entry with a `skip_reason` belongs to `files_skipped`, even when it also carries a digest: an encoding skip is hashed before it is decoded, so counting digits alone would count that file twice and break the sum. `files_scanned` is therefore an entry with a digest and no skip reason. A binary entry (Wasm, ELF, Mach-O, archive) counts as scanned: its bytes are hashed and role-tagged, and the byte detectors read it, so the report says it was read rather than skipped.
+
+`run_scan` computes the three counts and raises `ValueError` naming all of them when scanned plus skipped does not equal the index total. The CLI maps that to exit 2, so an entry that is neither read nor named by a skip fails the run instead of disappearing from a report that claims to be complete.
 
 ### 7.9 FileEntry and ScanContext
 
@@ -425,6 +431,10 @@ Dropped from `ScanContext`: `mode`, `tool_version`, `repo_head`, `base`. Those d
 
 The invariant this enforces is that detector code cannot see less than it needs and cannot see more than a finding should depend on. `tests/unit/test_model.py` asserts both field lists verbatim, so a re-added field is a deliberate edit to that test rather than an unnoticed one.
 
+`FileEntry`'s three states are mutually exclusive and `__post_init__` enforces it: text requires a `sha256`; a `skip_reason` forbids both text and a digest; an entry with none of the three is rejected. A skipped entry carrying text would let a detector scan bytes the report says were never read, inverting the guarantee skip findings exist to provide. The one skip that is hashed-but-not-decoded has no digest for that reason, and the stale-manifest detector records its synthetic path as skipped.
+
+The engine modules `runner.py`, `model.py`, `fingerprint.py` and `roles.py` make no filesystem, `eval`, `exec`, `compile` or `subprocess` call, and only `collector.py` imports `subprocess`. `tests/unit/test_engine_boundaries.py` holds that boundary by parsing the four files with `ast`, and its self-tests prove the checker rejects a doctored `open` or `subprocess.run`. A new engine module joins the scanned set with one line in `ENGINE_MODULES`.
+
 ## 8. Fail-closed behavior
 
 | Situation | Result |
@@ -433,9 +443,10 @@ The invariant this enforces is that detector code cannot see less than it needs 
 | File unreadable, or changed size while being read | `skipped-unreadable` (HIGH) |
 | Config file at the trusted base over `MAX_CONFIG_BYTES` | `skipped-unreadable` (HIGH); the shipped defaults apply and the change's copy is not compared |
 | NUL byte in text after BOM handling | `nul-in-text` (HIGH) |
+| A content magic role took the file out of text scanning | `content-magic-role` (INFO, names the role and path) |
 | Undecodable text | `non-utf8-text` (HIGH sensitive roles, else WARN) |
 | Line over `line_cap` | `cfg-long-line` (HIGH in a `SENSITIVE_ROLES` file, else WARN); regex skipped for that line |
-| Symlink | `skipped-symlink` (INFO) |
+| Symlink | `skipped-symlink` (HIGH for sensitive roles, else INFO) |
 | Unmerged index entry (merge conflict) | `skipped-unmerged` (HIGH for sensitive roles, else WARN); no version of the file is read |
 | Submodule | `submodule-present` (INFO) |
 | Archive present | `wasm-archive-skipped` (WARN) |

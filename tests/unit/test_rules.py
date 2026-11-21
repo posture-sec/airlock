@@ -83,7 +83,7 @@ def make_entry(
     path: str = "postcss.config.mjs",
     text: str = "eval(x)\n",
     roles: tuple[str, ...] = ("tooling-config", "source"),
-    sha256: str | None = None,
+    sha256: str | None = "a" * 64,
 ) -> FileEntry:
     return FileEntry(path=path, sha256=sha256, roles=roles, text=text)
 
@@ -271,7 +271,7 @@ class TestApplyPatterns:
         assert finding.evidence == "eval(x)"
 
     def test_a_file_without_text_is_not_matched(self, dynamic_rules: Path) -> None:
-        binary = FileEntry(path="a.wasm", sha256=None, roles=("wasm",), text=None)
+        binary = FileEntry(path="a.wasm", sha256="a" * 64, roles=("wasm",), text=None)
         assert apply_patterns(load_rules(dynamic_rules), binary, line_cap=200) == ()
 
     def test_a_bogus_line_cap_is_refused(self, dynamic_rules: Path) -> None:

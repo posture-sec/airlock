@@ -89,7 +89,7 @@ def render(
     if report.suppressed:
         body = (
             f"{len(report.suppressed)} finding(s) are hidden by the trusted airlock.toml; "
-            "the JSON output names each one and its reason."
+            "--format json names each one and its reason."
         )
         lines.append(f"::notice title=airlock::{escape_data(body)}")
     return "\n".join(lines) + ("\n" if lines else "")

@@ -1,0 +1,11 @@
+# Corpus registry for real-world scanner snapshots (tests/corpus/).
+#
+# Each entry in [[snapshots]] must have:
+# - name: directory name under tests/corpus/<name>/
+# - commit: 40-character lowercase hexadecimal commit SHA
+# - source_url: source repository or reference URL
+# - licence: non-empty licence identifier or notice
+# - rules_expected: non-empty array of shipped rule ids expected to fire
+#
+# Keep entries sorted by name. Add snapshots only with reviewed provenance/licensing.
+snapshots = []

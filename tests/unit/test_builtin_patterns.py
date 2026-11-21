@@ -86,7 +86,7 @@ def commit_files(root: Path, files: dict[str, str]) -> None:
 
 
 def entry(path: str, roles: tuple[str, ...], text: str) -> FileEntry:
-    return FileEntry(path=path, sha256=None, roles=roles, text=text)
+    return FileEntry(path=path, sha256="a" * 64, roles=roles, text=text)
 
 
 def hits(path: str, roles: tuple[str, ...], text: str) -> set[str]:

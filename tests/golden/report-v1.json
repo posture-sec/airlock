@@ -1,0 +1,62 @@
+{
+  "base": null,
+  "exit_code": 1,
+  "files_indexed": 13,
+  "files_scanned": 12,
+  "files_skipped": {
+    "skipped-oversize": 1
+  },
+  "findings": [
+    {
+      "evidence": "const res = eval(payload);",
+      "fingerprint": "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "line": 42,
+      "message": "Dynamic code evaluation in configuration file",
+      "occurrence": 0,
+      "path": "postcss.config.mjs",
+      "roles": [
+        "tooling-config"
+      ],
+      "rule_id": "cfg-dynamic-code",
+      "severity": "high",
+      "suppressible": true,
+      "suppressed_by": null
+    },
+    {
+      "evidence": null,
+      "fingerprint": "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210",
+      "line": 0,
+      "message": "File exceeds max_file_bytes limit (1048576 bytes)",
+      "occurrence": 0,
+      "path": "dist/large-bundle.js",
+      "roles": [
+        "source"
+      ],
+      "rule_id": "skipped-oversize",
+      "severity": "high",
+      "suppressible": false,
+      "suppressed_by": null
+    }
+  ],
+  "mode": "full",
+  "repo_head": "0123456789abcdef0123456789abcdef01234567",
+  "schema_version": 1,
+  "suppressed": [
+    {
+      "evidence": "http://127.0.0.1:8545",
+      "fingerprint": "sha256:1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff",
+      "line": 15,
+      "message": "Plaintext network endpoint in configuration",
+      "occurrence": 0,
+      "path": "hardhat.config.ts",
+      "roles": [
+        "tooling-config"
+      ],
+      "rule_id": "cfg-network",
+      "severity": "warn",
+      "suppressible": true,
+      "suppressed_by": "local test node endpoint allowed in dev"
+    }
+  ],
+  "tool_version": "0.0.1"
+}

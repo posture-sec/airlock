@@ -45,7 +45,9 @@ def make_entry(
         if text is not None
         else (roles.WASM_ROLE,)
     )
-    return FileEntry(path=path, sha256=sha256, roles=roles_, text=text)
+    digest = sha256 if sha256 is not None else ("a" * 64 if text is not None else None)
+    skip_reason = None if digest is not None else "unreadable"
+    return FileEntry(path=path, sha256=digest, roles=roles_, text=text, skip_reason=skip_reason)
 
 
 def make_context(entries: list[FileEntry], **overrides: Any) -> ScanContext:
@@ -152,7 +154,11 @@ class TestDispatch:
         assert errors[0].severity is Severity.HIGH
         assert not errors[0].suppressible
         assert errors[0].path == "."
-        assert "detector fell over" in errors[0].message
+        # The exception text is evidence now, so scanned content cannot enter the message.
+        assert "Boom" in errors[0].message
+        assert "detector fell over" not in errors[0].message
+        assert errors[0].evidence is not None
+        assert "detector fell over" in errors[0].evidence
 
     def test_a_generator_that_fails_part_way_still_yields_what_it_found(
         self, registry: Any

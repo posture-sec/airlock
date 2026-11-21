@@ -89,6 +89,7 @@ def report(
         mode=kwargs.pop("mode", Mode.PR),  # type: ignore[arg-type]
         repo_head=str(kwargs.pop("repo_head", "b" * 40)),
         base=kwargs.pop("base", "c" * 40),  # type: ignore[arg-type]
+        files_indexed=int(kwargs.pop("files_indexed", 12)),
         files_scanned=int(kwargs.pop("files_scanned", 12)),
         files_skipped=dict(kwargs.pop("files_skipped", {})),  # type: ignore[arg-type]
         findings=findings,
@@ -290,7 +291,7 @@ class TestGithubAnnotations:
         text = github.render(report(suppressed=(finding(),)))
         expected = (
             "::notice title=airlock::1 finding(s) are hidden by the trusted airlock.toml; "
-            "the JSON output names each one and its reason.\n"
+            "--format json names each one and its reason.\n"
         )
 
         assert text == expected
@@ -456,8 +457,9 @@ class TestSummaryContent:
     def test_long_evidence_is_truncated(self) -> None:
         text = summary.render(report(finding(evidence="x" * 5_000)))
 
-        assert "x" * summary.SUMMARY_EVIDENCE_CHARS in text
-        assert "x" * (summary.SUMMARY_EVIDENCE_CHARS + 1) not in text
+        visible = summary.SUMMARY_EVIDENCE_CHARS - len(summary.SUMMARY_EVIDENCE_MARKER)
+        assert "x" * visible in text
+        assert "x" * (visible + 1) not in text
 
     def test_the_document_names_the_mode_and_exit_code(self) -> None:
         text = summary.render(report(mode=Mode.PUSH, exit_code=EXIT_FINDINGS))
