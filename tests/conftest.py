@@ -36,6 +36,8 @@ from __future__ import annotations
 
 import importlib.util
 import subprocess
+import sys
+import types
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
@@ -44,6 +46,15 @@ from typing import TYPE_CHECKING
 import pytest
 
 from airlock.policy import MANIFEST_FILENAME
+
+# `tests/unit/test_suite_budget.py` loads this file by path under a private module name and
+# does not put it in `sys.modules`. A `@dataclass` below asks for
+# `sys.modules[__name__].__dict__` to resolve its field annotations, so an unregistered module
+# raises `AttributeError` at class-creation time. Binding `__name__` before the first class lets
+# the same file run both as a pytest plugin and standalone; it is a no-op on the plugin path,
+# where the name is already bound.
+if __name__ not in sys.modules:  # pragma: no cover - import-time guard
+    sys.modules[__name__] = types.ModuleType(__name__)
 
 if TYPE_CHECKING:
     from _pytest.config import Config
@@ -177,6 +188,7 @@ class SuiteBudget:
 
 def pytest_configure(config: Config) -> None:
     config.pluginmanager.register(SuiteBudget(suite_ceiling()), "airlock-suite-budget")
+
 
 # ---------------------------------------------------------------------------
 # Scratch repository factory (task 9.34, issue #92).

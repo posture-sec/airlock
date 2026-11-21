@@ -101,6 +101,7 @@ EXPECTED_BUILDER_MODULES = (
     "tests.fixtures.editor_profile_fp",
     "tests.fixtures.native_binary_artifact",
     "tests.fixtures.npm_lockfile_registry",
+    "tests.fixtures.pr_mode",
     "tests.fixtures.stellar_seed",
     "tests.fixtures.wasm_lfs_pointer",
     "tests.fixtures.wasm_manifest",
