@@ -327,7 +327,7 @@ class TestContextAndReport:
     def test_file_entry_may_still_record_a_skip(self) -> None:
         entry = FileEntry(
             path="big.js",
-            sha256=DIGEST,
+            sha256=None,
             roles=("source",),
             text=None,
             skip_reason="skipped-oversize",
@@ -340,6 +340,7 @@ class TestContextAndReport:
             mode=Mode.FULL,
             repo_head="b4a661b",
             base=None,
+            files_indexed=12,
             files_scanned=12,
             files_skipped={},
             findings=(),
@@ -353,6 +354,7 @@ class TestContextAndReport:
             mode=Mode.FULL,
             repo_head="b4a661b",
             base=None,
+            files_indexed=3,
             files_scanned=0,
             files_skipped={"skipped-unreadable": 3},
             findings=(make_finding(rule_id="detector-error", severity=Severity.HIGH),),

@@ -32,10 +32,11 @@ WORKFLOW_ROLE = "workflow"
 PACKAGE_MANIFEST_ROLE = "package-manifest"
 INSTALL_HOOK_ROLE = "install-hook"
 
-# Mach-O appears in both endiannesses and as a fat archive; PE files start with MZ.
+# Mach-O appears in both endiannesses and as a fat archive. PE files also start with MZ, but
+# that two-byte check lives in `_is_pe`: two ASCII bytes are a legal start for a text file, so
+# the prefix alone cannot decide the file is a binary.
 _NATIVE_PREFIXES: tuple[bytes, ...] = (
     b"\x7fELF",
-    b"MZ",
     b"\xfe\xed\xfa\xce",
     b"\xfe\xed\xfa\xcf",
     b"\xfe\xed\xfa\xca",
@@ -58,6 +59,13 @@ _ARCHIVE_PREFIXES: tuple[bytes, ...] = (
 )
 
 _TAR_MAGIC_AT_257 = b"ustar"
+
+#: A PE file is recognised from header bytes already read. `MZ` alone is not enough: it would
+#: let whoever commits a file remove it from every text rule by choosing its first two characters.
+_MZ_PREFIX = b"MZ"
+_DOS_HEADER_BYTES = 64
+_E_LFANEW_OFFSET = 0x3C
+_PE_SIGNATURE = b"PE\x00\x00"
 
 #: Roles where a file the scanner could not fully read is a HIGH finding, not a WARN
 #: (`ARCHITECTURE.md` 8). Hiding a payload in a build config is the attack this tool exists
@@ -126,10 +134,25 @@ SOURCE_SUFFIXES = frozenset(
 DOC_SUFFIXES = frozenset({".md", ".markdown", ".txt", ".rst", ".adoc", ".cfg", ".ini"})
 
 
+def _is_pe(head: bytes) -> bool:
+    """True when the DOS header points at a PE signature inside the buffer.
+
+    Only header bytes are read: the `e_lfanew` offset is bounds-checked against the buffer, so
+    no length taken from the file is ever followed into it. A truncated MZ file fails this check
+    and falls through to the role globs and extension, where it is scanned as text.
+    """
+    if len(head) < _DOS_HEADER_BYTES:
+        return False
+    offset = int.from_bytes(head[_E_LFANEW_OFFSET : _E_LFANEW_OFFSET + 4], "little")
+    return head[offset : offset + len(_PE_SIGNATURE)] == _PE_SIGNATURE
+
+
 def roles_from_magic(head: bytes) -> tuple[str, ...]:
     """Content-magic roles, applied whatever the extension claims (FR-02)."""
     if head.startswith(WASM_MAGIC):
         return (WASM_ROLE,)
+    if head.startswith(_MZ_PREFIX):
+        return (NATIVE_ROLE,) if _is_pe(head) else ()
     if head.startswith(_NATIVE_PREFIXES):
         return (NATIVE_ROLE,)
     if head.startswith(_ARCHIVE_PREFIXES) or (

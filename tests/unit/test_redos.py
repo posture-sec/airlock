@@ -160,7 +160,7 @@ PATTERNS = patterns_under_test()
 def entry(text: str) -> FileEntry:
     return FileEntry(
         path="postcss.config.js",
-        sha256=None,
+        sha256="a" * 64,
         roles=("tooling-config", "source"),
         text=text,
     )

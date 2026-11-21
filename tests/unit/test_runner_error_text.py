@@ -49,6 +49,7 @@ def report(finding: Finding) -> ScanReport:
         mode=Mode.PR,
         repo_head="b" * 40,
         base="c" * 40,
+        files_indexed=1,
         files_scanned=1,
         files_skipped={},
         findings=(finding,),

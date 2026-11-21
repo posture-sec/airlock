@@ -45,7 +45,9 @@ def make_entry(
         if text is not None
         else (roles.WASM_ROLE,)
     )
-    return FileEntry(path=path, sha256=sha256, roles=roles_, text=text)
+    digest = sha256 if sha256 is not None else ("a" * 64 if text is not None else None)
+    skip_reason = None if digest is not None else "unreadable"
+    return FileEntry(path=path, sha256=digest, roles=roles_, text=text, skip_reason=skip_reason)
 
 
 def make_context(entries: list[FileEntry], **overrides: Any) -> ScanContext:

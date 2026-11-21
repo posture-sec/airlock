@@ -30,13 +30,26 @@ ROLE_GLOBS = {
 }
 
 
+def _pe_head(lfanew: int = 0x40) -> bytes:
+    """A minimal PE head: `MZ`, `e_lfanew` at 0x3C and the signature it points at."""
+    dos = bytearray(64)
+    dos[0:2] = b"MZ"
+    dos[0x3C:0x40] = lfanew.to_bytes(4, "little")
+    return bytes(dos) + b"\x00" * (lfanew - len(dos)) + b"PE\x00\x00"
+
+
 class TestMagic:
     def test_wasm_magic_wins_over_the_extension(self) -> None:
         assert roles_from_magic(WASM_HEAD) == (WASM_ROLE,)
 
     @pytest.mark.parametrize(
         "head",
-        [b"\x7fELF\x02\x01\x01", b"MZ\x90\x03", b"\xca\xfe\xba\xbe", b"\xcf\xfa\xed\xfe"],
+        [
+            b"\x7fELF\x02\x01\x01",
+            _pe_head(),
+            b"\xca\xfe\xba\xbe",
+            b"\xcf\xfa\xed\xfe",
+        ],
     )
     def test_native_binaries(self, head: bytes) -> None:
         assert roles_from_magic(head) == (NATIVE_ROLE,)

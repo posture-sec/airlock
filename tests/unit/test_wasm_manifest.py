@@ -34,7 +34,9 @@ def make_rules() -> tuple[Any, ...]:
 
 
 def make_entry(path: str, sha: str | None, *, entry_roles: tuple[str, ...]) -> FileEntry:
-    return FileEntry(path=path, sha256=sha, roles=entry_roles, text=None)
+    # A digest means hashed but not decoded; no digest means the collector skipped the file.
+    skip_reason = None if sha is not None else "unreadable"
+    return FileEntry(path=path, sha256=sha, roles=entry_roles, text=None, skip_reason=skip_reason)
 
 
 def wasm(path: str, sha: str | None = BUILD_A) -> FileEntry:

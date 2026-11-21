@@ -342,10 +342,24 @@ def _collect_one(
 
     sha256 = hashlib.sha256(data).hexdigest()
 
-    if roles_from_magic(head):
+    magic_roles = roles_from_magic(head)
+    if magic_roles:
         # Wasm, native binaries and archives are hashed and role-tagged, not decoded. Their
         # detector rules work on bytes, and running text rules over them would only produce
         # noise. The roles came from magic, so nothing here depends on the extension.
+        #
+        # The decision to leave the text pass is reported, not silent: a content magic role is
+        # what removes a file from every text rule, and the report has to say so.
+        findings.append(
+            _state(
+                "content-magic-role",
+                Severity.INFO,
+                entry.path,
+                magic_roles,
+                f"role {'/'.join(magic_roles)} comes from content magic, so the file was "
+                "hashed but not scanned as text",
+            )
+        )
         return (
             FileEntry(path=entry.path, sha256=sha256, roles=roles),
             tuple(findings),
@@ -376,10 +390,12 @@ def _collect_one(
             )
         )
         if not SCANNABLE_ROLES.intersection(roles):
+            # No digest on a skipped entry: the model's skipped state means the file was not
+            # decoded, and a digest here would make the report describe a file it never scanned.
             return (
                 FileEntry(
                     path=entry.path,
-                    sha256=sha256,
+                    sha256=None,
                     roles=roles,
                     skip_reason=SKIP_ENCODING,
                 ),

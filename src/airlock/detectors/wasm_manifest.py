@@ -28,6 +28,9 @@ ARCHIVE_RULE_ID = "wasm-archive-skipped"
 
 WASM_SUFFIX = ".wasm"
 LFS_VERSION = "version https://git-lfs.github.com/spec/v1"
+#: Reason on the synthetic entry a stale manifest path gets. It is not a collector skip reason
+#: and never reaches `files_skipped`; the path it names has no tracked file at all.
+ABSENT_PATH_REASON = "absent-from-tree"
 
 
 def _require_rule(rules: dict[str, Rule], rule_id: str) -> Rule:
@@ -240,9 +243,17 @@ def run(ctx: ScanContext) -> Iterable[PendingFinding]:
         if any(path in tracked_paths for path in manifest_entry.paths):
             continue
         path = manifest_entry.paths[0]
+        # No tracked file exists at this path, so the entry is synthetic rather than collected.
+        # It still has to be one of `FileEntry`'s three states, and a path with neither digest
+        # nor text is recorded as skipped; the reason never reaches `files_skipped`.
         yield finding_for(
             stale_rule,
-            FileEntry(path=path, sha256=None, roles=(WASM_ROLE,)),
+            FileEntry(
+                path=path,
+                sha256=None,
+                roles=(WASM_ROLE,),
+                skip_reason=ABSENT_PATH_REASON,
+            ),
             0,
             evidence=manifest_entry.sha256,
             message=(

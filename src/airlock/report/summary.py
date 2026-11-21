@@ -21,6 +21,8 @@ from ..model import Finding, ScanReport, Severity
 
 #: The summary is size-limited by GitHub, so evidence is shorter here than in the JSON.
 SUMMARY_EVIDENCE_CHARS = 200
+SUMMARY_EVIDENCE_MARKER = " ..."
+TRUNCATION_MARKER = SUMMARY_EVIDENCE_MARKER
 
 #: `#` and `-` are deliberately absent: they only take effect at the start of a line, and no
 #: attacker-controlled text is ever placed there (rows start with a pipe, bullets with a dash).
@@ -45,7 +47,8 @@ def truncated(evidence: str | None) -> str:
     cleaned = flatten(evidence)
     if len(cleaned) <= SUMMARY_EVIDENCE_CHARS:
         return cleaned
-    return cleaned[:SUMMARY_EVIDENCE_CHARS] + " ..."
+    prefix_len = max(0, SUMMARY_EVIDENCE_CHARS - len(SUMMARY_EVIDENCE_MARKER))
+    return cleaned[:prefix_len] + SUMMARY_EVIDENCE_MARKER
 
 
 def fence_for(texts: Iterable[str]) -> str:
