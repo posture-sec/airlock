@@ -1,6 +1,6 @@
 # ROADMAP: Airlock
 
-Last updated: 2026-11-21 08:55 UTC
+Last updated: 2026-11-21 18:40 UTC
 
 Roadmap version: 1
 
@@ -43,7 +43,7 @@ The repository is 100% ready when every task in Phases 0 to 8 is done and every 
 | 6 | Stellar detectors | 0 | 5 | 0% |
 | 7 | Hardening and edge cases | 4 | 13 | 31% |
 | 8 | Release v0.2.0 and community | 2 | 6 | 33% |
-| 9 (backlog) | Backlog | 36 | 49 | 73% |
+| 9 (backlog) | Backlog | 37 | 50 | 74% |
 | **Phases 0 to 8** | **Readiness total** | **46** | **95** | **48%** |
 | Gates | G1 to G10 | 0 | 10 | 0% |
 <!-- PROGRESS:END -->
@@ -324,6 +324,7 @@ families.
 - [x] **9.47** Report a symlink in a sensitive role as `skipped-symlink` HIGH instead of INFO, keeping INFO for ordinary paths; the target is never read (#9).
 - [x] **9.48** Report a second valid suppression entry with the same rule, path and fingerprint as `suppression-invalid`, naming both positions and which one is consulted first; the first entry still decides (#13).
 - [x] **9.49** Build the `detector-error` message from scanner text, the detector module and the exception type only, moving the exception text to evidence with C0 controls escaped and newlines flattened (#15).
+- [x] **9.50** Bound the step summary so a large scan cannot overflow it: `SUMMARY_BUDGET_BYTES` sits below the 1 MiB upload ceiling, evidence is cut before rows, and the document states how many rows and evidence blocks it withheld while the counts and mode/exit lines survive; `tests/unit/test_summary_size.py` fails before the change with a body over the ceiling (#67).
 
 ## 6. Dependency map (critical path)
 
