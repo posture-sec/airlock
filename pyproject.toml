@@ -40,6 +40,9 @@ dev = ["pytest>=8", "ruff>=0.6", "mypy>=1.11"]
 testpaths = ["tests"]
 # `src` is the package under test; `.` lets the suite import its own fixture builders.
 pythonpath = ["src", "."]
+markers = [
+  "perf: file-count scale measurement, gated on AIRLOCK_PERF=1 (issue #88).",
+]
 
 [tool.ruff]
 line-length = 100
