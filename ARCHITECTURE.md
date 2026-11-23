@@ -578,6 +578,11 @@ Residuals, stated rather than hidden:
   security tool's documentation. A loader named `README.md` therefore keeps its invisible characters
   and its endpoints from these rules; it also keeps an extension nothing executes, and
   `cfg-long-line` and `nul-in-text` still read the role.
+- U+200D and U+200C are not in the invisible-character class. Both are spelling, not concealment:
+  a joiner builds emoji sequences and several writing systems, and a non-joiner is ordinary
+  orthography in Persian, Arabic, Urdu and Hindi. A localized string in a `.ts` file was a HIGH
+  finding and could fail a `fail_on = "high"` scan until U+200C left the class (issue #32). U+200B
+  and the bidi overrides remain HIGH, and `tests/unit/test_rule_unicode_locale.py` holds both halves.
 - The severity tiers are a false-positive budget (risk R-2), not a ranking of harm. The two HIGHs are
   shapes with no innocent reading in a file that is code; a tool fingerprint and a single endpoint
   mention are WARN because each has a common legitimate form (a committed obfuscated bundle, a

@@ -103,6 +103,7 @@ EXPECTED_BUILDER_MODULES = (
     "tests.fixtures.npm_lockfile_registry",
     "tests.fixtures.pr_mode",
     "tests.fixtures.stellar_seed",
+    "tests.fixtures.unicode_locale",
     "tests.fixtures.wasm_lfs_pointer",
     "tests.fixtures.wasm_manifest",
 )

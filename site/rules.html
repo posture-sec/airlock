@@ -95,7 +95,7 @@
         <span class="sev sev--high">HIGH</span>
       </div>
       <p class="rule-title">Invisible or direction-flipping character in code</p>
-      <p class="rule-why">A zero-width or bidi-override character inside an identifier is invisible in a diff, survives a reviewer reading the line out loud, and defeats a grep for the payload name, because the name on the screen is not the name in the file. This is why matching raw text with no masking is a hard rule rather than a style choice. U+200D is deliberately absent from the class: a zero-width joiner is how emoji sequences and several writing systems are spelled, and it is the one character in this neighbourhood that code carries legitimately.</p>
+      <p class="rule-why">A zero-width or bidi-override character inside an identifier is invisible in a diff, survives a reviewer reading the line out loud, and defeats a grep for the payload name, because the name on the screen is not the name in the file. This is why matching raw text with no masking is a hard rule rather than a style choice. U+200D is deliberately absent from the class: a zero-width joiner is how emoji sequences and several writing systems are spelled, and it is the one character in this neighbourhood that code carries legitimately. U+200C is absent for the same reason: the zero-width non-joiner is ordinary orthography in Persian, Arabic, Urdu and Hindi, so a localized string is not a payload.</p>
       <p class="rule-meta">
         <span>Detector <b>pattern engine</b></span>
         <span>Roles <b>source, tooling-config, editor-autorun, other</b></span>
