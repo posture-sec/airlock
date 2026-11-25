@@ -150,7 +150,7 @@ Priority: **P0** ships in v0.1.0, **P1** in v0.2.0, **Later** is backlog (`ROADM
 | FR-18 | `cargo_vectors` | P1 | Every tracked Cargo manifest is parsed as TOML; `[patch.*]`, Git dependencies across the standard and workspace dependency tables, and dependency paths escaping the repository are reported with table, key and source context. Malformed TOML is a detector error. |
 | FR-19 | SARIF 2.1.0 output (deferred to task 7.6) | P1 | Validates against the schema; result count capped; uses `partialFingerprints["airlock/v1"]` (D-09, ADR-019), settled before shipping with no migration needed |
 | FR-20 | Git LFS pointer and submodule handling | P1 | A valid LFS pointer at a `.wasm` path marked `filter=lfs` is compared by oid to the trusted manifest without fetching; unknown oids remain HIGH and malformed or unmarked pointers remain unlisted |
-| FR-21 | Extended config globs and vector roles (`vite`, `webpack`, `jest`, `.husky/*`, `devcontainer.json`, composite action files) | P1 | False-positive review on the six repos |
+| FR-21 | Extended config globs and vector roles (`vite`, `webpack`, `jest`, `.husky/*`, `devcontainer.json`, composite action files) | P1 | Vite, Webpack and Jest configs resolve to `tooling-config`; remaining names await false-positive review |
 | FR-22 | Watch mode: scheduled scan from a separate trusted repository, with an ancestry check against the last seen SHA | Later (decision D-04) | See ARCHITECTURE.md 16.2, item B2 |
 | FR-23 | Org scan and workflow-drift report | Later | |
 | FR-24 | History scan of reflog and unreachable objects | Later | |

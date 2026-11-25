@@ -52,6 +52,7 @@ FAMILIES: tuple[Family, ...] = (
     Family("native_binary", "Native binaries"),
     Family("npm_registry", "npm registry"),
     Family("stellar_seed", "Stellar keys"),
+    Family("submodules", "Submodule integrity"),
     Family("wasm_manifest", "Artifact integrity"),
 )
 

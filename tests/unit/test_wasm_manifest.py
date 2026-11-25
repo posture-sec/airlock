@@ -117,12 +117,19 @@ class TestMismatchAndMove:
 
     def test_a_known_hash_at_an_other_path_is_a_warn_move(self) -> None:
         findings = run(
-            [wasm("dist/moved.wasm", BUILD_A)], manifest_of(listed("target/counter.wasm", BUILD_A))
+            [wasm("target/counter.wasm", BUILD_A), wasm("dist/moved.wasm", BUILD_A)],
+            manifest_of(listed("target/counter.wasm", BUILD_A)),
         )
         assert ids(findings) == ["wasm-path-moved"]
         assert findings[0].severity is Severity.WARN
         assert findings[0].suppressible
         assert "target/counter.wasm" in findings[0].message
+
+    def test_a_known_hash_at_a_new_path_is_clean_when_all_declared_paths_are_absent(self) -> None:
+        assert (
+            run([wasm("dist/renamed.wasm", BUILD_A)], manifest_of(listed("target/counter.wasm")))
+            == []
+        )
 
     def test_a_mismatch_wins_over_a_move_on_the_same_file(self) -> None:
         # The path is listed and the hash is known elsewhere: the declared slot changed content,
@@ -162,7 +169,10 @@ class TestStaleAndArchives:
     def test_a_move_leaves_no_stale_entry_behind(self) -> None:
         # The hash is still in the tree, so the manifest is describing a moved artifact, which is
         # `wasm-path-moved` alone.
-        findings = run([wasm("dist/new.wasm", BUILD_A)], manifest_of(listed("old.wasm", BUILD_A)))
+        findings = run(
+            [wasm("old.wasm", BUILD_A), wasm("dist/new.wasm", BUILD_A)],
+            manifest_of(listed("old.wasm", BUILD_A)),
+        )
         assert ids(findings) == ["wasm-path-moved"]
 
     def test_an_archive_is_reported_as_unexamined(self) -> None:

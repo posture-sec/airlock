@@ -54,6 +54,7 @@ airlock/
       cargo_vectors.py             # Cargo patch, Git and escaped path dependency checks (P1)                 (9.14)
       npm_registry.py              # package-lock resolved-host check (P1)                                   (9.12)
       native_binary.py             # tracked ELF and Mach-O binaries, reported as metadata (P1)              (9.23)
+      submodules.py                # tracked .gitmodules host drift for gitlinks (P1)                        (9.95)
     report/
       __init__.py                  # package docstring; every reporter imports only from model               (2.9)
       console.py                   # (2.9)

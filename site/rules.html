@@ -301,7 +301,7 @@
         <span class="sev sev--warn">WARN</span>
       </div>
       <p class="rule-title">Install hook or lifecycle script reaches the network</p>
-      <p class="rule-why">A `postinstall` script and a commit hook both run without a developer choosing them, so a downloader named in one is a payload server the reviewer cannot see in a lockfile. The bare host name stays out of this: a `repository.url` in the same manifest is not a fetch, which is why the pattern asks for a client verb or an install-from-URL argument rather than any `https://` text.</p>
+      <p class="rule-why">A `postinstall` script and a commit hook both run without a developer choosing them, so a downloader named in one is a payload server the reviewer cannot see in a lockfile. The bare host name stays out of this: a `repository.url` in the same manifest is not a fetch, which is why the pattern asks for a client verb or an install-from-URL argument rather than any `https://` text. One-shot runners (`npx`, `bunx`, `pnpm dlx` and `yarn dlx`) also need a remote specifier because they leave no lockfile entry; a bare package name remains ordinary tooling.</p>
       <p class="rule-meta">
         <span>Detector <b>pattern engine</b></span>
         <span>Roles <b>package-manifest, install-hook</b></span>
@@ -442,8 +442,27 @@
     </article>
   </div>
 </section>
+<section class="family" id="family-submodules" data-family="submodules">
+  <h3 class="family-head"><span><b>[ 08 ] Submodule integrity</b> / submodules</span><span>1 RULES / 1 WARN</span></h3>
+  <div class="rule-list-inner">
+    <article class="rule" id="submodule-url-drift" data-severity="warn"
+      data-family="submodules">
+      <div class="rule-top">
+        <h3 class="rule-id">submodule-url-drift</h3>
+        <span class="sev sev--warn">WARN</span>
+      </div>
+      <p class="rule-title">Submodule URL leaves the canonical host</p>
+      <p class="rule-why">A gitlink selects code that Airlock cannot inspect, so its tracked `.gitmodules` URL is part of the trust boundary. GitHub is the canonical host for this repository&#x27;s dependencies; another host or a missing URL can silently replace the reviewed source. Relative URLs inherit that canonical host and stay clean.</p>
+      <p class="rule-meta">
+        <span>Detector <b>submodules (code)</b></span>
+        <span>Roles <b>other</b></span>
+        <span>Suppressible <b>yes</b></span>
+      </p>
+    </article>
+  </div>
+</section>
 <section class="family" id="family-wasm_manifest" data-family="wasm_manifest">
-  <h3 class="family-head"><span><b>[ 08 ] Artifact integrity</b> / wasm_manifest</span><span>5 RULES / 2 HIGH / 3 WARN</span></h3>
+  <h3 class="family-head"><span><b>[ 09 ] Artifact integrity</b> / wasm_manifest</span><span>5 RULES / 2 HIGH / 3 WARN</span></h3>
   <div class="rule-list-inner">
     <article class="rule" id="wasm-unlisted" data-severity="high"
       data-family="wasm_manifest">

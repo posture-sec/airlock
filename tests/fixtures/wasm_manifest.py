@@ -82,11 +82,17 @@ def wasm_hash_mismatch() -> Fixture:
 
 
 def wasm_path_moved() -> Fixture:
-    """The known artifact at an unexpected path: a WARN, because the bytes are still audited."""
+    """The known artifact at an unexpected path while its declared path is still tracked.
+
+    `wasm-path-moved` warns only when the manifest's declared path is still present in the
+    tree: a declared path that is gone is an ordinary rename and stays clean, which
+    `tests/unit/test_wasm_manifest.py` pins separately. This case keeps the declared path
+    on disk with the same bytes, so the move is a WARN rather than a rename.
+    """
     data = wasm_bytes(5)
     return Fixture(
         positive=Case(
-            files=(File(ELSEWHERE, raw=data),),
+            files=(File(ELSEWHERE, raw=data), File(ARTIFACT, raw=data)),
             manifest=Manifest(entries=(entry_for(data, ARTIFACT),)),
         ),
         negative=listed(data, ARTIFACT),

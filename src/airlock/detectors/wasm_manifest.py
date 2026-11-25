@@ -65,6 +65,7 @@ def _compare(
     rules: dict[str, Rule],
     by_hash: dict[str, WasmEntry],
     by_path: dict[str, WasmEntry],
+    tracked_paths: set[str],
 ) -> PendingFinding | None:
     """One artifact against the manifest: mismatch, unknown hash, or a move."""
     if entry.sha256 is None:
@@ -105,6 +106,8 @@ def _compare(
             message=f"{entry.path} hashes to {_short(entry.sha256)}; {reason}",
         )
     if listed is None:
+        if not any(path in tracked_paths for path in known.paths):
+            return None
         return finding_for(
             _require_rule(rules, MOVED_RULE_ID),
             entry,
@@ -185,6 +188,7 @@ def _compare_lfs_pointer(
     rules: dict[str, Rule],
     by_hash: dict[str, WasmEntry],
     by_path: dict[str, WasmEntry],
+    tracked_paths: set[str],
 ) -> PendingFinding | None:
     if oid not in by_hash:
         return finding_for(
@@ -194,7 +198,7 @@ def _compare_lfs_pointer(
             evidence=oid,
             message=f"{entry.path} has LFS pointer oid {oid}, which is not in the manifest",
         )
-    return _compare(replace(entry, sha256=oid), rules, by_hash, by_path)
+    return _compare(replace(entry, sha256=oid), rules, by_hash, by_path, tracked_paths)
 
 
 def run(ctx: ScanContext) -> Iterable[PendingFinding]:
@@ -227,9 +231,9 @@ def run(ctx: ScanContext) -> Iterable[PendingFinding]:
         if effective_hash is not None:
             seen_hashes.add(effective_hash)
         finding = (
-            _compare_lfs_pointer(entry, oid, rules, by_hash, by_path)
+            _compare_lfs_pointer(entry, oid, rules, by_hash, by_path, tracked_paths)
             if oid is not None
-            else _compare(entry, rules, by_hash, by_path)
+            else _compare(entry, rules, by_hash, by_path, tracked_paths)
         )
         if finding is not None:
             yield finding

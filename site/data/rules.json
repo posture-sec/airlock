@@ -2,9 +2,9 @@
   "source": "rules/builtin",
   "counts": {
     "high": 18,
-    "warn": 11,
+    "warn": 12,
     "info": 0,
-    "total": 29
+    "total": 30
   },
   "rules": [
     {
@@ -217,7 +217,7 @@
         "install-hook"
       ],
       "suppressible": true,
-      "rationale": "A `postinstall` script and a commit hook both run without a developer choosing them, so a downloader named in one is a payload server the reviewer cannot see in a lockfile. The bare host name stays out of this: a `repository.url` in the same manifest is not a fetch, which is why the pattern asks for a client verb or an install-from-URL argument rather than any `https://` text."
+      "rationale": "A `postinstall` script and a commit hook both run without a developer choosing them, so a downloader named in one is a payload server the reviewer cannot see in a lockfile. The bare host name stays out of this: a `repository.url` in the same manifest is not a fetch, which is why the pattern asks for a client verb or an install-from-URL argument rather than any `https://` text. One-shot runners (`npx`, `bunx`, `pnpm dlx` and `yarn dlx`) also need a remote specifier because they leave no lockfile entry; a bare package name remains ordinary tooling."
     },
     {
       "id": "pat-lifecycle-exec",
@@ -322,6 +322,18 @@
       ],
       "suppressible": true,
       "rationale": "A tracked Stellar secret seed hands whoever can read the repository the key. The finding is reported only when the StrKey checksum validates, so the encoding is intact; whether the seed is funded or live is not inferable offline and is not claimed."
+    },
+    {
+      "id": "submodule-url-drift",
+      "title": "Submodule URL leaves the canonical host",
+      "severity": "warn",
+      "family": "submodules",
+      "detector": "builtin:submodules",
+      "roles": [
+        "other"
+      ],
+      "suppressible": true,
+      "rationale": "A gitlink selects code that Airlock cannot inspect, so its tracked `.gitmodules` URL is part of the trust boundary. GitHub is the canonical host for this repository's dependencies; another host or a missing URL can silently replace the reviewed source. Relative URLs inherit that canonical host and stay clean."
     },
     {
       "id": "wasm-unlisted",

@@ -1,0 +1,9 @@
+[[rule]]
+id = "submodule-url-drift"
+title = "Submodule URL leaves the canonical host"
+roles = ["other"]
+detector = "builtin:submodules"
+severity = "warn"
+suppressible = true
+rationale = "A gitlink selects code that Airlock cannot inspect, so its tracked `.gitmodules` URL is part of the trust boundary. GitHub is the canonical host for this repository's dependencies; another host or a missing URL can silently replace the reviewed source. Relative URLs inherit that canonical host and stay clean."
+tests = { positive = "submodule_url_drift", negative = "submodule_url_drift" }

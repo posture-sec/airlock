@@ -1,6 +1,6 @@
 # ROADMAP: Airlock
 
-Last updated: 2026-11-24 21:15 UTC
+Last updated: 2026-11-25T11:06Z (tasks 9.100 to 9.103: runner specifiers, tooling configs, wasm renames and submodule drift)
 
 Roadmap version: 1
 
@@ -43,7 +43,7 @@ The repository is 100% ready when every task in Phases 0 to 8 is done and every 
 | 6 | Stellar detectors | 0 | 5 | 0% |
 | 7 | Hardening and edge cases | 4 | 13 | 31% |
 | 8 | Release v0.2.0 and community | 2 | 6 | 33% |
-| 9 (backlog) | Backlog | 86 | 99 | 87% |
+| 9 (backlog) | Backlog | 90 | 103 | 87% |
 | **Phases 0 to 8** | **Readiness total** | **46** | **95** | **48%** |
 | Gates | G1 to G10 | 0 | 10 | 0% |
 <!-- PROGRESS:END -->
@@ -374,6 +374,10 @@ families.
 - [x] **9.97** Compile the role glob table once per scan: `compile_role_globs` returns a frozen `RoleMatcher` of sorted role names and compiled segment patterns, `collect` builds it once and passes it to `_collect_one`, and `resolve_roles` still accepts a plain mapping so other callers are unchanged. `tests/unit/test_roles_recompile.py` counts segment builds over 100 paths and asserts one matcher per scan (#24).
 - [x] **9.98** Keep the full normalized evidence for fingerprint identity: `PendingFinding` caps `evidence` for display and keeps `evidence_full` for `evidence_key`, so two lines sharing 200 characters no longer collide, and suppressing the first leaves the second reported. `tests/unit/test_fingerprint_truncation_collision.py` covers the collision, the suppression and a pinned short-evidence digest (#17).
 - [x] **9.99** Build `detector-error` inside the message budget: the module name is shortened to its last component and truncated only as far as needed, and the exception type is always present, so `Finding` never rejects the message. `tests/unit/test_runner_error_truncation.py` covers a 300-character module, an empty exception message and every boundary length (#16).
+- [x] **9.100** Extend `pat-lifecycle-fetch` to `npx`, `bunx`, `pnpm dlx` and `yarn dlx` only when they carry a remote specifier; bare package names remain clean. Add positive and negative runner fixtures. (#35)
+- [x] **9.101** Map Vite, Webpack and Jest config filenames at any depth to `tooling-config`, with capability-rule positives and plugin-import negatives. (#38)
+- [x] **9.102** Treat a known Wasm hash at a new path as a clean rename when every declared path is absent, while retaining the moved WARN when a declared path remains. (#39)
+- [x] **9.103** Add the `submodules` detector and `submodule-url-drift` WARN for missing or non-canonical `.gitmodules` URLs; relative URLs inherit the canonical GitHub host. (#40)
 
 ## 6. Dependency map (critical path)
 
@@ -491,3 +495,4 @@ rules resolve. | 1.3, 1.7, 0.13 |
 | 2026-10-27 | Project named Airlock; repository `airlock-sec/airlock` (public, Apache-2.0, default branch `main`) adopted. Renamed `repo-guard` to `airlock` across all docs (CLI, package, policy file `airlock.toml`, env prefix `AIRLOCK_`). Added name-collision and account-type checks | 0.5, 0.15, 0.16, 1.1 |
 | 2026-10-27 | Drafted `project_structure.md`, `AGENTS.md`, `CLAUDE.md` and this roadmap; red-team revision of `PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md` (v0.2) | 0.2, 0.3 |
 | 2026-10-27 | First drafts of `PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md` | 0.1 |
+| 2026-11-24 00:00 | Close #35, #38, #39 and #40. Detect remote one-shot package runners, classify Vite/Webpack/Jest configs as tooling, distinguish Wasm renames from moves, and report submodule URLs that are missing or leave the canonical host. | 9.100, 9.101, 9.102, 9.103 |

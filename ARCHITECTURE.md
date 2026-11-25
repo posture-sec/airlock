@@ -136,7 +136,7 @@ A detector is a function `run(ctx) -> Iterable[Finding]` registered in a plain l
 
 Every call is wrapped: an exception becomes a HIGH `detector-error` and the remaining detectors still run. Findings a detector yielded before it raised are kept, so one failure on the tenth file costs the scan that file's coverage and nothing more. The message is built only from scanner-written text, the in-tree detector module name and the exception type, with the module shortened to its last component and the exception type always kept inside the 200-character budget the message is validated against. The exception's own text moves to the evidence, with C0 control characters escaped visibly and newlines flattened, so a path or line fragment quoted by the exception cannot forge an annotation or hide the finding. Third-party detector plugins are not supported, because loading external code would defeat the trust model.
 
-The registry also names the valid `builtin:<name>` targets (`DETECTOR_NAMES`), so the rule loader rejects a rule pointing at a detector that does not exist. Two detectors are registered now: `config_role` and `wasm_manifest`.
+The registry also names the valid `builtin:<name>` targets (`DETECTOR_NAMES`), so the rule loader rejects a rule pointing at a detector that does not exist. The registered detectors include `config_role`, `wasm_manifest` and `submodules`; the latter reads `.gitmodules` metadata only and never fetches a submodule.
 
 `runner.engine_findings` is the pass that is not a detector: it runs the `pattern` rules over every entry with text and reports the lines `line_cap` withheld from any regex. It lives in the runner so those lines are accounted for whatever the registry holds; a registry narrowed to one family must reduce what is matched, never what is reported.
 
@@ -290,7 +290,8 @@ tests        = { positive = "cfg-dynamic-code", negative = "cfg-dynamic-code" } 
 ```toml
 [roles.tooling-config]
 globs = ["**/postcss.config.*", "**/tailwind.config.*", "**/next.config.*",
-         "**/eslint.config.*", "**/babel.config.*"]
+         "**/eslint.config.*", "**/babel.config.*", "**/vite.config.*",
+         "**/webpack.config.*", "**/jest.config.*"]
 
 [roles.editor-autorun]
 globs = ["**/.vscode/tasks.json", "**/.vscode/settings.json"]
@@ -455,7 +456,7 @@ The engine modules `runner.py`, `model.py`, `fingerprint.py` and `roles.py` make
 | Line over `line_cap` | `cfg-long-line` (HIGH in a `SENSITIVE_ROLES` file, else WARN); regex skipped for that line |
 | Symlink | `skipped-symlink` (HIGH for sensitive roles, else INFO) |
 | Unmerged index entry (merge conflict) | `skipped-unmerged` (HIGH for sensitive roles, else WARN); no version of the file is read |
-| Submodule | `submodule-present` (INFO) |
+| Submodule | `submodule-present` (INFO), plus `submodule-url-drift` (WARN) for a missing or non-canonical `.gitmodules` URL |
 | Archive present | `wasm-archive-skipped` (WARN) |
 | Detector raises | `detector-error` (HIGH) |
 | Pushed `before` unreachable or non-ancestor | `history-rewritten` (HIGH) |
@@ -486,11 +487,18 @@ Capability rules were chosen because obfuscator fingerprints rotate while the me
 
 1. For every tracked file with role `wasm`, compute SHA-256.
 2. Build `path -> expected hash` and `hash -> entry` maps from the trusted manifest.
-3. Emit `wasm-unlisted` (hash unknown), `wasm-hash-mismatch` (listed path, different hash) or `wasm-path-moved` (known hash, unlisted path).
+3. Emit `wasm-unlisted` (hash unknown), `wasm-hash-mismatch` (listed path, different hash) or `wasm-path-moved` (known hash, unlisted path). A known hash at a new path is a clean rename when every path declared for that hash is absent; if one declared path remains, the additional path is still a move.
 4. Emit `wasm-manifest-stale` for entries with no matching file. An entry whose declared path still holds a Wasm file is not called stale as well as mismatched or moved: one changed artifact, one finding.
 5. Detect archives and report `wasm-archive-skipped`. A `*.wasm` Git LFS pointer is resolved from its `oid sha256` only when `.gitattributes` marks the path with `filter=lfs`. The oid is compared to the trusted manifest without fetching the object, and a matching oid counts as seen for stale-entry accounting. An unknown oid is `wasm-unlisted` HIGH and names the full oid. A malformed pointer, invalid oid or size field, or pointer not marked LFS keeps the existing unlisted result. The size field is syntax-checked only: verifying the remote object's byte count would require fetching it, and the manifest stores no size.
 
 Wasm binary basics: magic `00 61 73 6D`, then version `01 00 00 00`. [Verified: Wasm binary format] No section parsing in v0.1; the SEP-58 metadata check is Later.
+
+### 9.2a `submodules`
+
+For each collected gitlink, parse the tracked `.gitmodules` metadata without fetching the child
+repository. A missing URL or a URL whose host is not `github.com` yields the suppressible WARN
+`submodule-url-drift`; a relative URL inherits `github.com` and is clean. The existing
+`submodule-present` INFO remains the state finding that records the skipped child contents.
 
 ### 9.3 `soroban_profile` (P1)
 

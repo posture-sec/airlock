@@ -69,12 +69,14 @@ roles = ["package-manifest", "install-hook"]
 detector = "pattern"
 severity = "warn"
 suppressible = true
-rationale = "A `postinstall` script and a commit hook both run without a developer choosing them, so a downloader named in one is a payload server the reviewer cannot see in a lockfile. The bare host name stays out of this: a `repository.url` in the same manifest is not a fetch, which is why the pattern asks for a client verb or an install-from-URL argument rather than any `https://` text."
+rationale = "A `postinstall` script and a commit hook both run without a developer choosing them, so a downloader named in one is a payload server the reviewer cannot see in a lockfile. The bare host name stays out of this: a `repository.url` in the same manifest is not a fetch, which is why the pattern asks for a client verb or an install-from-URL argument rather than any `https://` text. One-shot runners (`npx`, `bunx`, `pnpm dlx` and `yarn dlx`) also need a remote specifier because they leave no lockfile entry; a bare package name remains ordinary tooling."
 pattern = { kind = "regex", value = '''(?x)
   \b(?:curl|wget)\b
   | \bInvoke-(?:WebRequest|RestMethod)\b
   | \bgit\s+(?:clone|fetch|pull|submodule\s+update)\b
   | \b(?:npm|pnpm|yarn)\s+(?:install|i|add)\s+["'`]?(?:git\+)?(?:https?://|git://|ssh://)
+  | \b(?:npx|bunx)\s+(?:--[^\s]+\s+)*(?:https?://|git\+https://|git://|ssh://|github:|gitlab:)
+  | \b(?:pnpm|yarn)\s+dlx\s+(?:--[^\s]+\s+)*(?:https?://|git\+https://|git://|ssh://|github:|gitlab:)
 ''' }
 tests = { positive = "ci_lifecycle_fetch", negative = "ci_lifecycle_fetch" }
 

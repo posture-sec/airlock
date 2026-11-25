@@ -12,6 +12,9 @@ globs = [
   "**/next.config.*",
   "**/eslint.config.*",
   "**/babel.config.*",
+  "**/vite.config.*",
+  "**/webpack.config.*",
+  "**/jest.config.*",
 ]
 
 [roles.editor-autorun]
@@ -39,5 +42,5 @@ globs = ["**/package.json"]
 [roles.install-hook]
 globs = ["**/.husky/**", "**/.githooks/**"]
 
-# Extra configs (vite, webpack, jest and others) are P1 and need false-positive review
-# against tests/corpus before they are added here.
+# These configs are loaded as code by their build and test tools, so capability rules must see
+# them under the same role as the other tooling entry points.

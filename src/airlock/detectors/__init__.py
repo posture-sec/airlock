@@ -15,7 +15,15 @@ from collections.abc import Callable, Iterable
 
 from ..fingerprint import PendingFinding
 from ..model import ScanContext
-from . import cargo_vectors, ci_surface, config_role, npm_registry, stellar_seed, wasm_manifest
+from . import (
+    cargo_vectors,
+    ci_surface,
+    config_role,
+    npm_registry,
+    stellar_seed,
+    submodules,
+    wasm_manifest,
+)
 from .native_binary import native_binary
 
 Detector = Callable[[ScanContext], Iterable[PendingFinding]]
@@ -27,6 +35,7 @@ DETECTORS: tuple[Detector, ...] = (
     native_binary,
     npm_registry.run,
     stellar_seed.run,
+    submodules.run,
     wasm_manifest.run,
 )
 
@@ -39,6 +48,7 @@ DETECTOR_NAMES: frozenset[str] = frozenset(
         "native_binary",
         "npm_registry",
         "stellar_seed",
+        "submodules",
         "wasm_manifest",
     }
 )

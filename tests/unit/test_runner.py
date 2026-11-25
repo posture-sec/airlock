@@ -144,7 +144,7 @@ class TestDispatch:
         assert calls == ["first", "second"]
 
     def test_the_shipped_detectors_are_registered(self) -> None:
-        assert len(runner.DETECTORS) == len(DETECTOR_NAMES) == 7
+        assert len(runner.DETECTORS) == len(DETECTOR_NAMES) == 8
 
     def test_a_detector_that_raises_becomes_one_high_finding(self, registry: Any) -> None:
         registry(raising_detector)
